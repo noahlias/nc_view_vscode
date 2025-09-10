@@ -2,7 +2,7 @@
   "name": "nc-view",
   "displayName": "NC Viewer",
   "description": "Interactive 3D G-code viewer for VS Code",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -22,6 +22,35 @@
   "activationEvents": [],
   "main": "./extension.js",
   "contributes": {
+    "configuration": {
+      "title": "Nc Viewer",
+      "properties": {
+        "ncViewer.excludeCodes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "G10",
+            "G28",
+            "G30",
+            "G53",
+            "G54",
+            "G55",
+            "G56",
+            "G57",
+            "G58",
+            "G59",
+            "G90",
+            "M00",
+            "M01",
+            "M02",
+            "M30"
+          ],
+          "description": "List of G/M codes to exclude from motion parsing."
+        }
+      }
+    },
     "commands": [
       {
         "command": "ncViewer.open",
@@ -31,21 +60,21 @@
     "menus": {
       "explorer/context": [
         {
-          "when": "resourceExtname =~ /\\.(nc|gcode|cnc)$/",
+          "when": "resourceExtname =~ /\\.(nc|gcode|cnc|NC|GCODE|CNC)$/",
           "command": "ncViewer.open",
           "group": "navigation"
         }
       ],
       "editor/context": [
         {
-          "when": "resourceExtname =~ /\\.(nc|gcode|cnc)$/",
+          "when": "resourceExtname =~ /\\.(nc|gcode|cnc|NC|GCODE|CNC)$/",
           "command": "ncViewer.open",
           "group": "navigation"
         }
       ],
       "editor/title/context": [
         {
-          "when": "resourceExtname =~ /\\.(nc|gcode|cnc)$/",
+          "when": "resourceExtname =~ /\\.(nc|gcode|cnc|NC|GCODE|CNC)$/",
           "command": "ncViewer.open",
           "group": "navigation"
         }
@@ -63,8 +92,9 @@
           ".nc",
           ".gcode",
           ".cnc",
-          ".tap",
-          ".prg"
+          ".NC",
+          ".GCODE",
+          ".CNC"
         ],
         "configuration": "./language-configuration.json"
       }

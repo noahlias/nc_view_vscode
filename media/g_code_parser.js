@@ -1,4 +1,8 @@
-function parseGCode(gcode, segmentCount = 64) {
+function parseGCode(
+  gcode,
+  segmentCount = 64,
+  excludeCodes = ["G10", "G90", "G53", "G30"],
+) {
   const lines = gcode.split("\n");
   const movements = [];
 
@@ -29,6 +33,14 @@ function parseGCode(gcode, segmentCount = 64) {
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i].toUpperCase().replace(/;.*$/, "").trim();
     if (line === "" || line.startsWith("(") || line.startsWith("%")) continue;
+
+    if (
+      excludeCodes.some((code) =>
+        line.match(new RegExp(`\\b${code}(\\s|$)`, "i")),
+      )
+    ) {
+      continue;
+    }
 
     const tokens = [...line.matchAll(/([A-Z])([-+]?[0-9]*\.?[0-9]+)/g)];
     const params = {};
