@@ -58,27 +58,6 @@
       }
     ],
     "menus": {
-      "explorer/context": [
-        {
-          "when": "resourceExtname =~ /\\.(nc|gcode|cnc|NC|GCODE|CNC)$/",
-          "command": "ncViewer.open",
-          "group": "navigation"
-        }
-      ],
-      "editor/context": [
-        {
-          "when": "resourceExtname =~ /\\.(nc|gcode|cnc|NC|GCODE|CNC)$/",
-          "command": "ncViewer.open",
-          "group": "navigation"
-        }
-      ],
-      "editor/title/context": [
-        {
-          "when": "resourceExtname =~ /\\.(nc|gcode|cnc|NC|GCODE|CNC)$/",
-          "command": "ncViewer.open",
-          "group": "navigation"
-        }
-      ],
       "editor/title": [
         {
           "command": "ncViewer.open",
