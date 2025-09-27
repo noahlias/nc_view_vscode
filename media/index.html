@@ -402,7 +402,7 @@
       function processGCode(gcode, excludeCodes) {
         clearSceneLines();
 
-        movements = parseGCode(gcode, (excludeCodes = excludeCodes));
+        movements = parseGCode(gcode, undefined, excludeCodes);
         console.log("Parsed movements:", movements);
 
         const positions = [];

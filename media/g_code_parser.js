@@ -13,7 +13,6 @@ function parseGCode(
   let motionMode = "absolute";
   let plane = "G17";
 
-  const ARC_CENTER_TOLERANCE = 0.001;
   const FULL_CIRCLE_TOLERANCE = 1e-6;
   const firstArcDetected = { used: false };
 
@@ -36,7 +35,7 @@ function parseGCode(
 
     if (
       excludeCodes.some((code) =>
-        line.match(new RegExp(`\\b${code}(\\s|$)`, "i")),
+        line.match(new RegExp("\b${code}(\s|$)", "i")),
       )
     ) {
       continue;
@@ -133,11 +132,11 @@ function parseGCode(
         if (!centerMode && !firstArcDetected.used) {
           const distRel = Math.abs(
             Math.hypot(startA - relCenter.A, startB - relCenter.B) -
-              Math.hypot(endA - relCenter.A, endB - relCenter.B),
+            Math.hypot(endA - relCenter.A, endB - relCenter.B),
           );
           const distAbs = Math.abs(
             Math.hypot(startA - absCenter.A, startB - absCenter.B) -
-              Math.hypot(endA - absCenter.A, endB - absCenter.B),
+            Math.hypot(endA - absCenter.A, endB - absCenter.B),
           );
           centerMode = distRel <= distAbs ? "relative" : "absolute";
           firstArcDetected.used = true;
@@ -156,40 +155,38 @@ function parseGCode(
       const isFullCircle =
         Math.hypot(endA - startA, endB - startB) < FULL_CIRCLE_TOLERANCE;
 
-      if (!isFullCircle) {
-        // if (isFullCircle) {
-        // sweep = currentCommand === 'G2' ? -2 * Math.PI : 2 * Math.PI;
-        // } else {
+      if (isFullCircle) {
+        sweep = currentCommand === 'G2' ? -2 * Math.PI : 2 * Math.PI;
+      } else {
         if (currentCommand === "G2" && sweep > 0) sweep -= 2 * Math.PI;
         if (currentCommand === "G3" && sweep < 0) sweep += 2 * Math.PI;
-        // }
-
-        const orthogonalAxis =
-          plane === "G17" ? "Z" : plane === "G18" ? "Y" : "X";
-        const dOrthogonal =
-          target[orthogonalAxis] - currentPosition[orthogonalAxis];
-
-        for (let j = 1; j <= segmentCount; j++) {
-          const angle = startAngle + (sweep * j) / segmentCount;
-          const ratio = j / segmentCount;
-          const point = { ...currentPosition };
-
-          point[axisA] = centerA + radius * Math.cos(angle);
-          point[axisB] = centerB + radius * Math.sin(angle);
-          point[orthogonalAxis] =
-            currentPosition[orthogonalAxis] + ratio * dOrthogonal;
-
-          if (
-            !Number.isNaN(point.X) &&
-            !Number.isNaN(point.Y) &&
-            !Number.isNaN(point.Z)
-          ) {
-            addMove("G1", point.X, point.Y, point.Z, currentFeedrate, i);
-          }
-        }
-
-        currentPosition = { ...target };
       }
+
+      const orthogonalAxis =
+        plane === "G17" ? "Z" : plane === "G18" ? "Y" : "X";
+      const dOrthogonal =
+        target[orthogonalAxis] - currentPosition[orthogonalAxis];
+
+      for (let j = 1; j <= segmentCount; j++) {
+        const angle = startAngle + (sweep * j) / segmentCount;
+        const ratio = j / segmentCount;
+        const point = { ...currentPosition };
+
+        point[axisA] = centerA + radius * Math.cos(angle);
+        point[axisB] = centerB + radius * Math.sin(angle);
+        point[orthogonalAxis] =
+          currentPosition[orthogonalAxis] + ratio * dOrthogonal;
+
+        if (
+          !Number.isNaN(point.X) &&
+          !Number.isNaN(point.Y) &&
+          !Number.isNaN(point.Z)
+        ) {
+          addMove("G1", point.X, point.Y, point.Z, currentFeedrate, i);
+        }
+      }
+
+      currentPosition = { ...target };
     } else if (
       x !== undefined ||
       y !== undefined ||
