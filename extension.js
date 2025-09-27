@@ -20,7 +20,7 @@ function activate(context) {
 
   let disposable = vscode.commands.registerCommand("ncViewer.open", (uri) => {
     try {
-      if (!uri) {
+      if (!(uri instanceof vscode.Uri)) {
         const activeEditor = vscode.window.activeTextEditor;
         if (activeEditor) {
           uri = activeEditor.document.uri;
