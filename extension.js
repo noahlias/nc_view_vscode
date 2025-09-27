@@ -47,99 +47,93 @@ function activate(context) {
         context.extensionPath,
       );
 
-      vscode.workspace.openTextDocument(uri).then((doc) => {
-        const fileContent = doc.getText();
-        panel.webview.postMessage({
-          type: "loadGCode",
-          ncText: fileContent,
-          settings: getExtensionSettings(),
-        });
-
-        let targetEditor = null;
-
-        function findTargetEditor() {
-          return vscode.window.visibleTextEditors.find(
-            (editor) => editor.document.uri.toString() === uri.toString(),
-          );
-        }
-
-        const onDidChangeCursorPosition =
-          vscode.window.onDidChangeTextEditorSelection((e) => {
-            if (e.textEditor.document.uri.toString() === uri.toString()) {
-              const lineNumber = e.selections[0].active.line;
-
+      panel.webview.onDidReceiveMessage((message) => {
+        switch (message.type) {
+          case "webviewReady":
+            vscode.workspace.openTextDocument(uri).then((doc) => {
+              const fileContent = doc.getText();
               panel.webview.postMessage({
-                type: "cursorPositionChanged",
-                lineNumber: lineNumber,
-              });
-            }
-          });
-
-        const onDidChangeTextDocument =
-          vscode.workspace.onDidChangeTextDocument((e) => {
-            if (e.document.uri.toString() === uri.toString()) {
-              const updatedContent = e.document.getText();
-              panel.webview.postMessage({
-                type: "contentChanged",
-                ncText: updatedContent,
+                type: "loadGCode",
+                ncText: fileContent,
                 settings: getExtensionSettings(),
               });
-            }
-          });
 
-        panel.onDidDispose(() => {
-          onDidChangeCursorPosition.dispose();
-          onDidChangeTextDocument.dispose();
-        });
-      });
-
-      panel.webview.onDidReceiveMessage((message) => {
-        if (message.type === "highlightLine") {
-          const targetEditor = vscode.window.visibleTextEditors.find(
-            (editor) => editor.document.uri.toString() === uri.toString(),
-          );
-
-          if (targetEditor) {
-            const line = message.lineNumber;
-            const range = new vscode.Range(line, 0, line, 0);
-            targetEditor.selection = new vscode.Selection(
-              range.start,
-              range.end,
-            );
-            targetEditor.revealRange(
-              range,
-              vscode.TextEditorRevealType.InCenter,
-            );
-
-            vscode.window.showTextDocument(targetEditor.document, {
-              viewColumn: targetEditor.viewColumn,
-              preserveFocus: false,
-            });
-          } else {
-            outputChannel.appendLine(
-              `[NC Viewer] Target editor not found for URI: ${uri.toString()}`,
-            );
-
-            vscode.workspace.openTextDocument(uri).then((doc) => {
-              vscode.window
-                .showTextDocument(doc, {
-                  viewColumn: vscode.ViewColumn.One,
-                  preserveFocus: false,
-                })
-                .then((editor) => {
-                  const line = message.lineNumber;
-                  const range = new vscode.Range(line, 0, line, 0);
-                  editor.selection = new vscode.Selection(
-                    range.start,
-                    range.end,
-                  );
-                  editor.revealRange(
-                    range,
-                    vscode.TextEditorRevealType.InCenter,
-                  );
+              const onDidChangeCursorPosition =
+                vscode.window.onDidChangeTextEditorSelection((e) => {
+                  if (e.textEditor.document.uri.toString() === uri.toString()) {
+                    const lineNumber = e.selections[0].active.line;
+                    panel.webview.postMessage({
+                      type: "cursorPositionChanged",
+                      lineNumber: lineNumber,
+                    });
+                  }
                 });
+
+              const onDidChangeTextDocument =
+                vscode.workspace.onDidChangeTextDocument((e) => {
+                  if (e.document.uri.toString() === uri.toString()) {
+                    const updatedContent = e.document.getText();
+                    panel.webview.postMessage({
+                      type: "contentChanged",
+                      ncText: updatedContent,
+                      settings: getExtensionSettings(),
+                    });
+                  }
+                });
+
+              panel.onDidDispose(() => {
+                onDidChangeCursorPosition.dispose();
+                onDidChangeTextDocument.dispose();
+              });
             });
-          }
+            break;
+          case "highlightLine":
+            const targetEditor = vscode.window.visibleTextEditors.find(
+              (editor) => editor.document.uri.toString() === uri.toString(),
+            );
+
+            if (targetEditor) {
+              const line = message.lineNumber;
+              const range = new vscode.Range(line, 0, line, 0);
+              targetEditor.selection = new vscode.Selection(
+                range.start,
+                range.end,
+              );
+              targetEditor.revealRange(
+                range,
+                vscode.TextEditorRevealType.InCenter,
+              );
+
+              vscode.window.showTextDocument(targetEditor.document, {
+                viewColumn: targetEditor.viewColumn,
+                preserveFocus: false,
+              });
+            } else {
+              outputChannel.appendLine(
+                `[NC Viewer] Target editor not found for URI: ${uri.toString()}`,
+              );
+
+              vscode.workspace.openTextDocument(uri).then((doc) => {
+                vscode.window
+                  .showTextDocument(doc, {
+                    viewColumn: vscode.ViewColumn.One,
+                    preserveFocus: false,
+                  })
+                  .then((editor) => {
+                    const line = message.lineNumber;
+                    const range = new vscode.Range(line, 0, line, 0);
+                    editor.selection = new vscode.Selection(
+                      range.start,
+                      range.end,
+                    );
+                    editor.revealRange(
+                      range,
+                      vscode.TextEditorRevealType.InCenter,
+                    );
+                  });
+              });
+            }
+            break;
         }
       });
     } catch (error) {

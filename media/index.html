@@ -688,6 +688,7 @@
       });
 
       resetCamera();
+      vscode.postMessage({ type: "webviewReady" });
       animate();
     </script>
   </body>
