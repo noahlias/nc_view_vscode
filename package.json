@@ -60,11 +60,11 @@
     ],
     "menus": {
       "editor/title": [
-      {
-        "command": "ncViewer.open",
-        "when": "resourceLangId == gcode",
-        "group": "navigation"
-      }
+        {
+          "command": "ncViewer.open",
+          "when": "resourceLangId == gcode",
+          "group": "navigation"
+        }
       ]
     },
     "keybindings": [
