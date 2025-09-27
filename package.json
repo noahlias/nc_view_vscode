@@ -54,19 +54,26 @@
     "commands": [
       {
         "command": "ncViewer.open",
-        "title": "Open NC Viewer"
+        "title": "Open NC Viewer",
+        "icon": "$(open-preview)"
       }
     ],
     "menus": {
       "editor/title": [
-        {
-          "command": "ncViewer.open",
-          "when": "resourceLangId == gcode",
-          "group": "navigation",
-          "icon": "$(open-preview)"
-        }
+      {
+        "command": "ncViewer.open",
+        "when": "resourceLangId == gcode",
+        "group": "navigation"
+      }
       ]
     },
+    "keybindings": [
+      {
+        "command": "ncViewer.open",
+        "key": "ctrl+k v",
+        "when": "editorTextFocus && resourceLangId == gcode"
+      }
+    ],
     "languages": [
       {
         "id": "gcode",
