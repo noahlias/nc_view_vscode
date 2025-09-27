@@ -78,6 +78,14 @@
           "command": "ncViewer.open",
           "group": "navigation"
         }
+      ],
+      "editor/title": [
+        {
+          "command": "ncViewer.open",
+          "when": "resourceLangId == gcode",
+          "group": "navigation",
+          "icon": "$(open-preview)"
+        }
       ]
     },
     "languages": [
