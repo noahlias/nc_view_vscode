@@ -35,7 +35,7 @@ function parseGCode(
 
     if (
       excludeCodes.some((code) =>
-        line.match(new RegExp("\b${code}(\s|$)", "i")),
+        line.match(new RegExp(`\\b${code}(\\s|$)`, "i")),
       )
     ) {
       continue;
