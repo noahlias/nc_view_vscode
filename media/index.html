@@ -559,7 +559,31 @@
       // Overwrite the renderer background
       const bgColor = computedStyles.getPropertyValue('--vscode-editor-background').trim();
       renderer.setClearColor(new THREE.Color(bgColor));
+
+      // Redraw lines with new colors if they exist
+      if (lineSegmentsMesh) {
+        selectLineSegments(parseInt(slider.value, 10), parseInt(slider.value, 10));
+      }
+
+      // Redraw axis lines
+      const axisLines = [];
+      scene.traverse((child) => { if (child.userData.isAxisLine) axisLines.push(child); });
+      axisLines.forEach((line) => scene.remove(line));
+      let box = new THREE.Box3().setFromObject(segmentsGroup);
+      if (box.isEmpty()) box = new THREE.Box3(new THREE.Vector3(-1, -1, -1), new THREE.Vector3(1, 1, 1));
+      addAxisLines(box);
     }
+
+    // Watch for theme changes
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          update3DViewColors();
+          break;
+        }
+      }
+    });
+    observer.observe(document.body, { attributes: true });
 
     function runWhenStylesAreReady(callback) {
       const check = () => {
