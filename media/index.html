@@ -17,46 +17,8 @@
       overflow: hidden;
     }
 
-    header {
-      height: 50px;
-      background-color: var(--vscode-sideBar-background);
-      color: var(--vscode-sideBar-foreground);
-      border-bottom: 1px solid var(--vscode-sideBar-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-    }
-
-    header .left {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    header button {
-      background: var(--vscode-button-background);
-      color: var(--vscode-button-foreground);
-      border: 1px solid var(--vscode-button-border, var(--vscode-button-background));
-      padding: 5px 10px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    header button:hover {
-      background: var(--vscode-button-hoverBackground);
-    }
-
-    input:checked+.slider {
-      background-color: #2196f3;
-    }
-
-    input:checked+.slider:before {
-      transform: translateX(14px);
-    }
-
     main {
-      height: calc(100% - 51px);
+      height: 100%;
       width: 100%;
     }
 
@@ -131,11 +93,7 @@
 </head>
 
 <body class="dark">
-  <header>
-    <div class="left">
-      <button id="resetViewBtn">Reset View</button>
-    </div>
-  </header>
+
   <main>
     <div class="viewer" id="viewer">
       <div class="viewer-info" id="viewerInfo">
@@ -187,15 +145,6 @@
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(viewer.clientWidth, viewer.clientHeight);
     viewer.appendChild(renderer.domElement);
-
-    const setViewerBackground = () => {
-      const bgColor = getComputedStyle(document.body)
-        .getPropertyValue("--viewer-bg-color")
-        .trim();
-      renderer.setClearColor(new THREE.Color(bgColor));
-    };
-
-    setViewerBackground();
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.mouseButtons = {
@@ -570,10 +519,6 @@
       rapidColor: 0xff0000,
       afterSelColor: 0xa6a6a6,
     };
-
-    document
-      .getElementById("resetViewBtn")
-      .addEventListener("click", resetCamera);
 
     function animate() {
       requestAnimationFrame(animate);
