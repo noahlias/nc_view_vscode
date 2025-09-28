@@ -30,8 +30,9 @@ function parseGCode(
   );
 
   for (let i = 0; i < lines.length; i++) {
-    let line = lines[i].toUpperCase().replace(/;.*$/, "").trim();
-    if (line === "" || line.startsWith("(") || line.startsWith("%")) continue;
+    let line = lines[i].trim().toUpperCase();
+    if (line.startsWith(";") || line.startsWith("(") || line.startsWith("%") || line === "") continue;
+    line = line.replace(/;.*$/, "").trim();
 
     if (
       excludeCodes.some((code) =>
