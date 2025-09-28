@@ -291,7 +291,7 @@
         switch (type) {
           case "loadGCode":
             if (ncText !== undefined) {
-              processGCode(ncText, excludeCodes);
+              processGCode(ncText, excludeCodes, true);
             }
             break;
 
@@ -301,7 +301,7 @@
 
           case "contentChanged":
             if (ncText !== undefined) {
-              processGCode(ncText, excludeCodes);
+              processGCode(ncText, excludeCodes, false);
             }
             break;
         }
@@ -399,7 +399,7 @@
           selectLineSegments(startIdx, endIdx);
         }
       }
-      function processGCode(gcode, excludeCodes) {
+      function processGCode(gcode, excludeCodes, isInitialLoad = true) {
         clearSceneLines();
 
         movements = parseGCode(gcode, undefined, excludeCodes);
@@ -453,7 +453,9 @@
         slider.value = 0;
         slider.max = movements.length - 1;
         selectLineSegments(movements.length, movements.length);
-        resetCamera();
+        if (isInitialLoad) {
+          resetCamera();
+        }
       }
 
       function resetCamera() {
