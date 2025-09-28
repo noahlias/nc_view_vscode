@@ -1,219 +1,213 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <title>NC Viewer</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta charset="UTF-8" />
-    <style>
-      :root {
-        --bg-header: #f5f5f5;
-        --text-header: #222;
-        --bg-viewer: #eeeeee;
-        --text-viewer: #222;
-        --btn-bg: #ddd;
-        --viewer-bg-color: #eeeeee;
-      }
 
-      body.dark {
-        --bg-header: #222;
-        --text-header: white;
-        --bg-viewer: #2c2c2c;
-        --text-viewer: white;
-        --btn-bg: #444;
-        --viewer-bg-color: #2c2c2c;
-      }
+<head>
+  <title>NC Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <style>
+    :root {
+      --bg-header: #f5f5f5;
+      --text-header: #222;
+      --bg-viewer: #eeeeee;
+      --text-viewer: #222;
+      --btn-bg: #ddd;
+      --viewer-bg-color: #eeeeee;
+    }
 
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        font-family: sans-serif;
-        overflow: hidden;
-      }
+    body.dark {
+      --bg-header: #222;
+      --text-header: white;
+      --bg-viewer: #2c2c2c;
+      --text-viewer: white;
+      --btn-bg: #444;
+      --viewer-bg-color: #2c2c2c;
+    }
 
-      header {
-        height: 50px;
-        background-color: var(--bg-header);
-        color: var(--text-header);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 20px;
-      }
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
 
-      header .left {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-      }
+    header {
+      height: 50px;
+      background-color: var(--bg-header);
+      color: var(--text-header);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
 
-      header button {
-        background: var(--btn-bg);
-        color: var(--text-header);
-        border: none;
-        padding: 5px 10px;
-        cursor: pointer;
-        font-size: 14px;
-      }
+    header .left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
 
-      .theme-toggle {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
+    header button {
+      background: var(--btn-bg);
+      color: var(--text-header);
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
 
-      .switch {
-        position: relative;
-        display: inline-block;
-        width: 34px;
-        height: 20px;
-      }
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-      .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 34px;
+      height: 20px;
+    }
 
-      .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        transition: 0.4s;
-        border-radius: 50px;
-      }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
 
-      .slider:before {
-        position: absolute;
-        content: "";
-        height: 12px;
-        width: 12px;
-        border-radius: 50px;
-        left: 4px;
-        bottom: 4px;
-        background-color: white;
-        transition: 0.4s;
-      }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 50px;
+    }
 
-      input:checked + .slider {
-        background-color: #2196f3;
-      }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      border-radius: 50px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+    }
 
-      input:checked + .slider:before {
-        transform: translateX(14px);
-      }
+    input:checked+.slider {
+      background-color: #2196f3;
+    }
 
-      main {
-        height: calc(100% - 50px);
-        width: 100%;
-      }
+    input:checked+.slider:before {
+      transform: translateX(14px);
+    }
 
-      .viewer {
-        width: 100%;
-        height: 100%;
-        background: var(--bg-viewer);
-        color: var(--text-viewer);
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-      }
+    main {
+      height: calc(100% - 50px);
+      width: 100%;
+    }
 
-      .viewer-info {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        z-index: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 8px 12px;
-        background-color: rgba(0, 0, 0, 0.3);
-        color: var(--text-viewer);
-        font-family: monospace;
-        font-size: 0.85rem;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 4px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      }
+    .viewer {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-viewer);
+      color: var(--text-viewer);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
 
-      .viewer-info span {
-        margin-bottom: 4px;
-      }
+    .viewer-info {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 8px 12px;
+      background-color: rgba(0, 0, 0, 0.3);
+      color: var(--text-viewer);
+      font-family: monospace;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
 
-      #viewerSlider {
-        position: absolute;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60%;
-        height: 10px;
-        background-color: #ddd;
-        -webkit-appearance: none;
-        appearance: none;
-        border-radius: 5px;
-        outline: none;
-        z-index: 1;
-      }
+    .viewer-info span {
+      margin-bottom: 4px;
+    }
 
-      #viewerSlider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 20px;
-        height: 20px;
-        background-color: #007bff;
-        border-radius: 50%;
-        cursor: pointer;
-      }
+    #viewerSlider {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 10px;
+      background-color: #ddd;
+      -webkit-appearance: none;
+      appearance: none;
+      border-radius: 5px;
+      outline: none;
+      z-index: 1;
+    }
 
-      #viewerSlider::-moz-range-thumb {
-        width: 20px;
-        height: 20px;
-        background-color: #007bff;
-        border-radius: 50%;
-        cursor: pointer;
-      }
-    </style>
-  </head>
+    #viewerSlider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background-color: #007bff;
+      border-radius: 50%;
+      cursor: pointer;
+    }
 
-  <body class="dark">
-    <header>
-      <div class="left">
-        <button id="resetViewBtn">Reset View</button>
-        <div class="theme-toggle">
-          <label for="toggleTheme" class="switch">
-            <input type="checkbox" id="toggleTheme" checked />
-            <span class="slider"></span>
-          </label>
-          <span>Dark Mode</span>
-        </div>
+    #viewerSlider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background-color: #007bff;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body class="dark">
+  <header>
+    <div class="left">
+      <button id="resetViewBtn">Reset View</button>
+      <div class="theme-toggle">
+        <label for="toggleTheme" class="switch">
+          <input type="checkbox" id="toggleTheme" checked />
+          <span class="slider"></span>
+        </label>
+        <span>Dark Mode</span>
       </div>
-    </header>
-    <main>
-      <div class="viewer" id="viewer">
-        <div class="viewer-info" id="viewerInfo">
-          <span>X: <span id="posX">0.000</span></span>
-          <span>Y: <span id="posY">0.000</span></span>
-          <span>Z: <span id="posZ">0.000</span></span>
-        </div>
-        <input
-          type="range"
-          id="viewerSlider"
-          min="0"
-          max="100"
-          value="0"
-          step="1"
-        />
+    </div>
+  </header>
+  <main>
+    <div class="viewer" id="viewer">
+      <div class="viewer-info" id="viewerInfo">
+        <span>X: <span id="posX">0.000</span></span>
+        <span>Y: <span id="posY">0.000</span></span>
+        <span>Z: <span id="posZ">0.000</span></span>
       </div>
-    </main>
+      <input type="range" id="viewerSlider" min="0" max="100" value="0" step="1" />
+    </div>
+  </main>
 
-    <script src="./g_code_parser.js"></script>
-    <script type="importmap">
+  <script src="./g_code_parser.js"></script>
+  <script type="importmap">
       {
         "imports": {
           "three": "./libs/three.module.js",
@@ -223,476 +217,515 @@
       }
     </script>
 
-    <script type="module">
-      import * as THREE from "three";
-      import { ViewportGizmo } from "three-viewport-gizmo";
-      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+  <script type="module">
+    import * as THREE from "three";
+    import { ViewportGizmo } from "three-viewport-gizmo";
+    import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-      // VS Code API for receiving file data
-      const vscode = acquireVsCodeApi();
+    // VS Code API for receiving file data
+    const vscode = acquireVsCodeApi();
 
-      const viewer = document.getElementById("viewer");
-      const scene = new THREE.Scene();
-      scene.up.set(0, 0, 1);
-      const segmentsGroup = new THREE.Group();
-      scene.add(segmentsGroup);
+    const viewer = document.getElementById("viewer");
+    const scene = new THREE.Scene();
+    scene.up.set(0, 0, 1);
+    const segmentsGroup = new THREE.Group();
+    scene.add(segmentsGroup);
 
-      const aspect = viewer.clientWidth / viewer.clientHeight;
-      const f0 = 20000;
-      const camera = new THREE.OrthographicCamera(
-        (-f0 * aspect) / 2,
-        (f0 * aspect) / 2,
-        f0 / 2,
-        -f0 / 2,
-        0.1,
-        2 * f0,
+    const aspect = viewer.clientWidth / viewer.clientHeight;
+    const f0 = 20000;
+    const camera = new THREE.OrthographicCamera(
+      (-f0 * aspect) / 2,
+      (f0 * aspect) / 2,
+      f0 / 2,
+      -f0 / 2,
+      0.1,
+      2 * f0,
+    );
+    camera.up.set(0, 0, 1);
+
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(viewer.clientWidth, viewer.clientHeight);
+    viewer.appendChild(renderer.domElement);
+
+    const setViewerBackground = () => {
+      const bgColor = getComputedStyle(document.body)
+        .getPropertyValue("--viewer-bg-color")
+        .trim();
+      renderer.setClearColor(new THREE.Color(bgColor));
+    };
+
+    setViewerBackground();
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.PAN,
+      MIDDLE: THREE.MOUSE.ROTATE,
+      RIGHT: null,
+    };
+    controls.screenSpacePanning = true;
+    controls.zoomToCursor = true;
+
+    const gizmo = new ViewportGizmo(camera, renderer, {
+      placement: "bottom-right",
+    });
+    gizmo.attachControls(controls);
+
+    let movements = [];
+    let lineSegmentsMesh = null;
+    let size = 0;
+
+    window.addEventListener("message", (event) => {
+      const { type, ncText, lineNumber, settings } = event.data;
+      const excludeCodes = settings?.excludeCodes || [
+        "G10",
+        "G30",
+        "G53",
+        "G90",
+      ];
+
+      switch (type) {
+        case "loadGCode":
+          if (ncText !== undefined) {
+            processGCode(ncText, excludeCodes, true);
+          }
+          break;
+
+        case "cursorPositionChanged":
+          highlightLineInViewer(lineNumber);
+          break;
+
+        case "contentChanged":
+          if (ncText !== undefined) {
+            processGCode(ncText, excludeCodes, false);
+          }
+          break;
+      }
+    });
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let isMouseDown = false;
+    let mouseDownPosition = { x: 0, y: 0 };
+
+    renderer.domElement.addEventListener("mousedown", (event) => {
+      isMouseDown = true;
+      mouseDownPosition.x = event.clientX;
+      mouseDownPosition.y = event.clientY;
+    });
+
+    renderer.domElement.addEventListener("mouseup", (event) => {
+      if (!isMouseDown) return;
+      isMouseDown = false;
+
+      const dx = event.clientX - mouseDownPosition.x;
+      const dy = event.clientY - mouseDownPosition.y;
+      const distanceSquared = dx * dx + dy * dy;
+      const clickThreshold = 5 * 5;
+
+      if (distanceSquared <= clickThreshold) {
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.params.Line.threshold = size / 100 / camera.zoom;
+        raycaster.setFromCamera(mouse, camera);
+
+        if (lineSegmentsMesh) {
+          const intersects = raycaster.intersectObject(
+            lineSegmentsMesh,
+            false,
+          );
+
+          if (intersects.length > 0) {
+            const intersect = intersects[0];
+            const faceIndex = intersect.index;
+            const segmentIndex = Math.floor(faceIndex / 2);
+
+            if (segmentIndex < movements.length - 1) {
+              const movement = movements[segmentIndex + 1];
+              const lineIdx = movement.lineNumber || 0;
+
+              vscode.postMessage({
+                type: "highlightLine",
+                lineNumber: lineIdx,
+              });
+
+              highlightLineSegmentsForLine(lineIdx);
+              slider.value = segmentIndex;
+            }
+          } else {
+            slider.value = 0;
+            selectLineSegments(movements.length, movements.length);
+          }
+        }
+      }
+    });
+
+    function highlightLineInViewer(lineNumber) {
+      let startIdx = -1;
+      let endIdx = -1;
+
+      for (let i = 1; i < movements.length; i++) {
+        if (movements[i].lineNumber === lineNumber) {
+          const segmentIdx = i - 1;
+          if (startIdx === -1) startIdx = segmentIdx;
+          endIdx = segmentIdx;
+        }
+      }
+
+      if (startIdx !== -1 && endIdx !== -1) {
+        slider.value = endIdx;
+        selectLineSegments(startIdx, endIdx);
+      }
+    }
+
+    function highlightLineSegmentsForLine(lineNumber) {
+      let startIdx = -1;
+      let endIdx = -1;
+
+      for (let i = 1; i < movements.length; i++) {
+        if (movements[i].lineNumber === lineNumber) {
+          const segmentIdx = i - 1;
+          if (startIdx === -1) startIdx = segmentIdx;
+          endIdx = segmentIdx;
+        }
+      }
+
+      if (startIdx !== -1 && endIdx !== -1) {
+        selectLineSegments(startIdx, endIdx);
+      }
+    }
+    function processGCode(gcode, excludeCodes, isInitialLoad = true) {
+      clearSceneLines();
+
+      movements = parseGCode(gcode, undefined, excludeCodes);
+      console.log("Parsed movements:", movements);
+
+      const positions = [];
+      const colorsArray = [];
+
+      const colorFeed = new THREE.Color(colors.feedColor);
+      const colorRapid = new THREE.Color(colors.rapidColor);
+
+      for (let i = 1; i < movements.length; i++) {
+        const start = new THREE.Vector3(
+          movements[i - 1].X,
+          movements[i - 1].Y,
+          movements[i - 1].Z,
+        );
+        const end = new THREE.Vector3(
+          movements[i].X,
+          movements[i].Y,
+          movements[i].Z,
+        );
+        const isRapid = movements[i].command === "G0";
+        const color = isRapid ? colorRapid : colorFeed;
+
+        positions.push(start.x, start.y, start.z, end.x, end.y, end.z);
+        colorsArray.push(
+          color.r,
+          color.g,
+          color.b,
+          color.r,
+          color.g,
+          color.b,
+        );
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(positions, 3),
       );
-      camera.up.set(0, 0, 1);
+      geometry.setAttribute(
+        "color",
+        new THREE.Float32BufferAttribute(colorsArray, 3),
+      );
 
-      const renderer = new THREE.WebGLRenderer();
-      renderer.setSize(viewer.clientWidth, viewer.clientHeight);
-      viewer.appendChild(renderer.domElement);
+      const material = new THREE.LineBasicMaterial({ vertexColors: true });
+      lineSegmentsMesh = new THREE.LineSegments(geometry, material);
+      segmentsGroup.add(lineSegmentsMesh);
 
-      const setViewerBackground = () => {
-        const bgColor = getComputedStyle(document.body)
-          .getPropertyValue("--viewer-bg-color")
-          .trim();
-        renderer.setClearColor(new THREE.Color(bgColor));
-      };
+      slider.value = 0;
+      slider.max = movements.length - 1;
+      selectLineSegments(movements.length, movements.length);
+      if (isInitialLoad) {
+        resetCamera();
+      }
+    }
 
+    function resetCamera() {
+      let box = new THREE.Box3().setFromObject(segmentsGroup);
+
+      if (box.isEmpty()) {
+        box = new THREE.Box3(
+          new THREE.Vector3(-1, -1, -1),
+          new THREE.Vector3(1, 1, 1),
+        );
+      }
+
+      size = box.getSize(new THREE.Vector3()).length();
+      const center = box.getCenter(new THREE.Vector3());
+
+      const f = size * 1.1;
+      camera.left = (-f * aspect) / 2;
+      camera.right = (f * aspect) / 2;
+      camera.top = f / 2;
+      camera.bottom = -f / 2;
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+
+      camera.position.set(
+        center.x + size * 1.1,
+        center.y + size * -1.1,
+        size * 1.1,
+      );
+      camera.lookAt(center);
+
+      controls.target.copy(center);
+      controls.update();
+
+      addAxisLines(box);
+    }
+
+    function clearSceneLines() {
+      if (lineSegmentsMesh) {
+        segmentsGroup.remove(lineSegmentsMesh);
+        lineSegmentsMesh.geometry.dispose();
+        lineSegmentsMesh.material.dispose();
+        lineSegmentsMesh = null;
+      }
+
+      const axisLines = [];
+      scene.traverse((child) => {
+        if (child.userData.isAxisLine) {
+          axisLines.push(child);
+        }
+      });
+
+      axisLines.forEach((line) => scene.remove(line));
+    }
+
+    const slider = document.getElementById("viewerSlider");
+
+    slider.addEventListener("input", (event) => {
+      const value = parseInt(event.target.value, 10);
+
+      if (value >= 0 && value < movements.length - 1) {
+        const startIdx = value;
+        const endIdx = value;
+        selectLineSegments(startIdx, endIdx);
+        // 获取对应的行号并通知VS Code
+        if (
+          movements[value + 1] &&
+          movements[value + 1].lineNumber !== undefined
+        ) {
+          const lineNumber = movements[value + 1].lineNumber;
+          vscode.postMessage({
+            type: "highlightLine",
+            lineNumber: lineNumber,
+          });
+        }
+      }
+    });
+
+    function addAxisLines(box) {
+      const marginFactor = 0.2;
+      const min = box.min;
+      const max = box.max;
+
+      const axes = [
+        { dir: "x", color: 0xff3653, start: min.x, end: max.x },
+        { dir: "y", color: 0x8adb00, start: min.y, end: max.y },
+        { dir: "z", color: 0x2c8fff, start: min.z, end: max.z },
+      ];
+
+      axes.forEach(({ dir, color, start, end }) => {
+        const length = end - start;
+        const margin = length * marginFactor;
+
+        let from = new THREE.Vector3();
+        let to = new THREE.Vector3();
+
+        if (dir === "x") {
+          from.set(start - margin, 0, 0);
+          to.set(end + margin, 0, 0);
+        } else if (dir === "y") {
+          from.set(0, start - margin, 0);
+          to.set(0, end + margin, 0);
+        } else if (dir === "z") {
+          from.set(0, 0, start - margin);
+          to.set(0, 0, end + margin);
+        }
+
+        const material = new THREE.LineBasicMaterial({
+          color,
+          depthTest: false,
+          transparent: true,
+          opacity: 0.8,
+        });
+
+        const geometry = new THREE.BufferGeometry().setFromPoints([from, to]);
+        const line = new THREE.Line(geometry, material);
+        line.userData.isAxisLine = true;
+
+        scene.add(line);
+      });
+    }
+
+    function selectLineSegments(startIdx, endIdx) {
+      if (!lineSegmentsMesh) return;
+
+      const colorAttr = lineSegmentsMesh.geometry.attributes.color;
+      const color = new THREE.Color();
+
+      for (let i = 0; i < movements.length - 1; i++) {
+        const segmentIndex = i;
+        const isSelected = segmentIndex >= startIdx && segmentIndex <= endIdx;
+        const isAfter = segmentIndex > endIdx;
+
+        const isRapid = movements[i + 1].command === "G0";
+        let baseColor = isRapid ? colors.rapidColor : colors.feedColor;
+
+        if (isSelected) {
+          color.setHex(colors.selectedColor);
+        } else {
+          if (isAfter) {
+            color.setHex(colors.afterSelColor);
+          } else {
+            color.setHex(baseColor);
+          }
+        }
+
+        const vi = segmentIndex * 2;
+        colorAttr.setXYZ(vi, color.r, color.g, color.b);
+        colorAttr.setXYZ(vi + 1, color.r, color.g, color.b);
+      }
+
+      colorAttr.needsUpdate = true;
+
+      if (startIdx < movements.length - 1) {
+        const endPos = new THREE.Vector3(
+          movements[endIdx + 1].X,
+          movements[endIdx + 1].Y,
+          movements[endIdx + 1].Z,
+        );
+
+        document.getElementById("posX").textContent =
+          movements[endIdx + 1].X.toFixed(3);
+        document.getElementById("posY").textContent =
+          movements[endIdx + 1].Y.toFixed(3);
+        document.getElementById("posZ").textContent =
+          movements[endIdx + 1].Z.toFixed(3);
+      } else {
+        document.getElementById("posX").textContent = "0.000";
+        document.getElementById("posY").textContent = "0.000";
+        document.getElementById("posZ").textContent = "0.000";
+      }
+    }
+
+    let colors = {
+      selectedColor: 0xffffff,
+      feedColor: 0x39ff14,
+      rapidColor: 0xff0000,
+      afterSelColor: 0xa6a6a6,
+    };
+
+    document
+      .getElementById("resetViewBtn")
+      .addEventListener("click", resetCamera);
+
+    const toggleTheme = document.getElementById("toggleTheme");
+
+    function applyTheme(isDark) {
+      toggleTheme.checked = isDark;
+      document.body.classList.toggle("dark", isDark);
       setViewerBackground();
 
-      const controls = new OrbitControls(camera, renderer.domElement);
-      controls.mouseButtons = {
-        LEFT: THREE.MOUSE.PAN,
-        MIDDLE: THREE.MOUSE.ROTATE,
-        RIGHT: null,
-      };
-      controls.screenSpacePanning = true;
-      controls.zoomToCursor = true;
-
-      const gizmo = new ViewportGizmo(camera, renderer, {
-        placement: "bottom-right",
-      });
-      gizmo.attachControls(controls);
-
-      let movements = [];
-      let lineSegmentsMesh = null;
-      let size = 0;
-
-      window.addEventListener("message", (event) => {
-        const { type, ncText, lineNumber, settings } = event.data;
-        const excludeCodes = settings?.excludeCodes || [
-          "G10",
-          "G30",
-          "G53",
-          "G90",
-        ];
-
-        switch (type) {
-          case "loadGCode":
-            if (ncText !== undefined) {
-              processGCode(ncText, excludeCodes, true);
-            }
-            break;
-
-          case "cursorPositionChanged":
-            highlightLineInViewer(lineNumber);
-            break;
-
-          case "contentChanged":
-            if (ncText !== undefined) {
-              processGCode(ncText, excludeCodes, false);
-            }
-            break;
-        }
-      });
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-      let isMouseDown = false;
-      let mouseDownPosition = { x: 0, y: 0 };
-
-      renderer.domElement.addEventListener("mousedown", (event) => {
-        isMouseDown = true;
-        mouseDownPosition.x = event.clientX;
-        mouseDownPosition.y = event.clientY;
-      });
-
-      renderer.domElement.addEventListener("mouseup", (event) => {
-        if (!isMouseDown) return;
-        isMouseDown = false;
-
-        const dx = event.clientX - mouseDownPosition.x;
-        const dy = event.clientY - mouseDownPosition.y;
-        const distanceSquared = dx * dx + dy * dy;
-        const clickThreshold = 5 * 5;
-
-        if (distanceSquared <= clickThreshold) {
-          const rect = renderer.domElement.getBoundingClientRect();
-          mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-          mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-          raycaster.params.Line.threshold = size / 100 / camera.zoom;
-          raycaster.setFromCamera(mouse, camera);
-
-          if (lineSegmentsMesh) {
-            const intersects = raycaster.intersectObject(
-              lineSegmentsMesh,
-              false,
-            );
-
-            if (intersects.length > 0) {
-              const intersect = intersects[0];
-              const faceIndex = intersect.index;
-              const segmentIndex = Math.floor(faceIndex / 2);
-
-              if (segmentIndex < movements.length - 1) {
-                const movement = movements[segmentIndex + 1];
-                const lineIdx = movement.lineNumber || 0;
-
-                vscode.postMessage({
-                  type: "highlightLine",
-                  lineNumber: lineIdx,
-                });
-
-                highlightLineSegmentsForLine(lineIdx);
-                slider.value = segmentIndex;
-              }
-            } else {
-              slider.value = 0;
-              selectLineSegments(movements.length, movements.length);
-            }
-          }
-        }
-      });
-
-      function highlightLineInViewer(lineNumber) {
-        let startIdx = -1;
-        let endIdx = -1;
-
-        for (let i = 1; i < movements.length; i++) {
-          if (movements[i].lineNumber === lineNumber) {
-            const segmentIdx = i - 1;
-            if (startIdx === -1) startIdx = segmentIdx;
-            endIdx = segmentIdx;
-          }
-        }
-
-        if (startIdx !== -1 && endIdx !== -1) {
-          slider.value = endIdx;
-          selectLineSegments(startIdx, endIdx);
-        }
+      if (isDark) {
+        colors.selectedColor = 0xffffff;
+        colors.feedColor = 0x39ff14;
+        colors.rapidColor = 0xff0000;
+      } else {
+        colors.selectedColor = 0x000000;
+        colors.feedColor = 0x000080;
+        colors.rapidColor = 0xff0000;
       }
+    }
 
-      function highlightLineSegmentsForLine(lineNumber) {
-        let startIdx = -1;
-        let endIdx = -1;
+    const savedTheme = localStorage.getItem("theme");
+    const isDark = savedTheme ? savedTheme === "dark" : toggleTheme.checked;
+    applyTheme(isDark);
 
-        for (let i = 1; i < movements.length; i++) {
-          if (movements[i].lineNumber === lineNumber) {
-            const segmentIdx = i - 1;
-            if (startIdx === -1) startIdx = segmentIdx;
-            endIdx = segmentIdx;
-          }
-        }
-
-        if (startIdx !== -1 && endIdx !== -1) {
-          selectLineSegments(startIdx, endIdx);
-        }
-      }
-      function processGCode(gcode, excludeCodes, isInitialLoad = true) {
-        clearSceneLines();
-
-        movements = parseGCode(gcode, undefined, excludeCodes);
-        console.log("Parsed movements:", movements);
-
-        const positions = [];
-        const colorsArray = [];
-
-        const colorFeed = new THREE.Color(colors.feedColor);
-        const colorRapid = new THREE.Color(colors.rapidColor);
-
-        for (let i = 1; i < movements.length; i++) {
-          const start = new THREE.Vector3(
-            movements[i - 1].X,
-            movements[i - 1].Y,
-            movements[i - 1].Z,
-          );
-          const end = new THREE.Vector3(
-            movements[i].X,
-            movements[i].Y,
-            movements[i].Z,
-          );
-          const isRapid = movements[i].command === "G0";
-          const color = isRapid ? colorRapid : colorFeed;
-
-          positions.push(start.x, start.y, start.z, end.x, end.y, end.z);
-          colorsArray.push(
-            color.r,
-            color.g,
-            color.b,
-            color.r,
-            color.g,
-            color.b,
-          );
-        }
-
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute(
-          "position",
-          new THREE.Float32BufferAttribute(positions, 3),
-        );
-        geometry.setAttribute(
-          "color",
-          new THREE.Float32BufferAttribute(colorsArray, 3),
-        );
-
-        const material = new THREE.LineBasicMaterial({ vertexColors: true });
-        lineSegmentsMesh = new THREE.LineSegments(geometry, material);
-        segmentsGroup.add(lineSegmentsMesh);
-
-        slider.value = 0;
-        slider.max = movements.length - 1;
-        selectLineSegments(movements.length, movements.length);
-        if (isInitialLoad) {
-          resetCamera();
-        }
-      }
-
-      function resetCamera() {
-        let box = new THREE.Box3().setFromObject(segmentsGroup);
-
-        if (box.isEmpty()) {
-          box = new THREE.Box3(
-            new THREE.Vector3(-1, -1, -1),
-            new THREE.Vector3(1, 1, 1),
-          );
-        }
-
-        size = box.getSize(new THREE.Vector3()).length();
-        const center = box.getCenter(new THREE.Vector3());
-
-        const f = size * 1.1;
-        camera.left = (-f * aspect) / 2;
-        camera.right = (f * aspect) / 2;
-        camera.top = f / 2;
-        camera.bottom = -f / 2;
-        camera.zoom = 1;
-        camera.updateProjectionMatrix();
-
-        camera.position.set(
-          center.x + size * 1.1,
-          center.y + size * -1.1,
-          size * 1.1,
-        );
-        camera.lookAt(center);
-
-        controls.target.copy(center);
-        controls.update();
-
-        addAxisLines(box);
-      }
-
-      function clearSceneLines() {
-        if (lineSegmentsMesh) {
-          segmentsGroup.remove(lineSegmentsMesh);
-          lineSegmentsMesh.geometry.dispose();
-          lineSegmentsMesh.material.dispose();
-          lineSegmentsMesh = null;
-        }
-
-        const axisLines = [];
-        scene.traverse((child) => {
-          if (child.userData.isAxisLine) {
-            axisLines.push(child);
-          }
-        });
-
-        axisLines.forEach((line) => scene.remove(line));
-      }
-
-      const slider = document.getElementById("viewerSlider");
-
-      slider.addEventListener("input", (event) => {
-        const value = parseInt(event.target.value, 10);
-
-        if (value >= 0 && value < movements.length - 1) {
-          const startIdx = value;
-          const endIdx = value;
-          selectLineSegments(startIdx, endIdx);
-          // 获取对应的行号并通知VS Code
-          if (
-            movements[value + 1] &&
-            movements[value + 1].lineNumber !== undefined
-          ) {
-            const lineNumber = movements[value + 1].lineNumber;
-            vscode.postMessage({
-              type: "highlightLine",
-              lineNumber: lineNumber,
-            });
-          }
-        }
-      });
-
-      function addAxisLines(box) {
-        const marginFactor = 0.2;
-        const min = box.min;
-        const max = box.max;
-
-        const axes = [
-          { dir: "x", color: 0xff3653, start: min.x, end: max.x },
-          { dir: "y", color: 0x8adb00, start: min.y, end: max.y },
-          { dir: "z", color: 0x2c8fff, start: min.z, end: max.z },
-        ];
-
-        axes.forEach(({ dir, color, start, end }) => {
-          const length = end - start;
-          const margin = length * marginFactor;
-
-          let from = new THREE.Vector3();
-          let to = new THREE.Vector3();
-
-          if (dir === "x") {
-            from.set(start - margin, 0, 0);
-            to.set(end + margin, 0, 0);
-          } else if (dir === "y") {
-            from.set(0, start - margin, 0);
-            to.set(0, end + margin, 0);
-          } else if (dir === "z") {
-            from.set(0, 0, start - margin);
-            to.set(0, 0, end + margin);
-          }
-
-          const material = new THREE.LineBasicMaterial({
-            color,
-            depthTest: false,
-            transparent: true,
-            opacity: 0.8,
-          });
-
-          const geometry = new THREE.BufferGeometry().setFromPoints([from, to]);
-          const line = new THREE.Line(geometry, material);
-          line.userData.isAxisLine = true;
-
-          scene.add(line);
-        });
-      }
-
-      function selectLineSegments(startIdx, endIdx) {
-        if (!lineSegmentsMesh) return;
-
-        const colorAttr = lineSegmentsMesh.geometry.attributes.color;
-        const color = new THREE.Color();
-
-        for (let i = 0; i < movements.length - 1; i++) {
-          const segmentIndex = i;
-          const isSelected = segmentIndex >= startIdx && segmentIndex <= endIdx;
-          const isAfter = segmentIndex > endIdx;
-
-          const isRapid = movements[i + 1].command === "G0";
-          let baseColor = isRapid ? colors.rapidColor : colors.feedColor;
-
-          if (isSelected) {
-            color.setHex(colors.selectedColor);
-          } else {
-            if (isAfter) {
-              color.setHex(colors.afterSelColor);
-            } else {
-              color.setHex(baseColor);
-            }
-          }
-
-          const vi = segmentIndex * 2;
-          colorAttr.setXYZ(vi, color.r, color.g, color.b);
-          colorAttr.setXYZ(vi + 1, color.r, color.g, color.b);
-        }
-
-        colorAttr.needsUpdate = true;
-
-        if (startIdx < movements.length - 1) {
-          const endPos = new THREE.Vector3(
-            movements[endIdx + 1].X,
-            movements[endIdx + 1].Y,
-            movements[endIdx + 1].Z,
-          );
-
-          document.getElementById("posX").textContent =
-            movements[endIdx + 1].X.toFixed(3);
-          document.getElementById("posY").textContent =
-            movements[endIdx + 1].Y.toFixed(3);
-          document.getElementById("posZ").textContent =
-            movements[endIdx + 1].Z.toFixed(3);
-        } else {
-          document.getElementById("posX").textContent = "0.000";
-          document.getElementById("posY").textContent = "0.000";
-          document.getElementById("posZ").textContent = "0.000";
-        }
-      }
-
-      let colors = {
-        selectedColor: 0xffffff,
-        feedColor: 0x39ff14,
-        rapidColor: 0xff0000,
-        afterSelColor: 0xa6a6a6,
-      };
-
-      document
-        .getElementById("resetViewBtn")
-        .addEventListener("click", resetCamera);
-
-      const toggleTheme = document.getElementById("toggleTheme");
-
-      function applyTheme(isDark) {
-        toggleTheme.checked = isDark;
-        document.body.classList.toggle("dark", isDark);
-        setViewerBackground();
-
-        if (isDark) {
-          colors.selectedColor = 0xffffff;
-          colors.feedColor = 0x39ff14;
-          colors.rapidColor = 0xff0000;
-        } else {
-          colors.selectedColor = 0x000000;
-          colors.feedColor = 0x000080;
-          colors.rapidColor = 0xff0000;
-        }
-      }
-
-      const savedTheme = localStorage.getItem("theme");
-      const isDark = savedTheme ? savedTheme === "dark" : toggleTheme.checked;
+    toggleTheme.addEventListener("change", function () {
+      const isDark = this.checked;
+      localStorage.setItem("theme", isDark ? "dark" : "light");
       applyTheme(isDark);
+      selectLineSegments(movements.length, movements.length);
+    });
 
-      toggleTheme.addEventListener("change", function () {
-        const isDark = this.checked;
-        localStorage.setItem("theme", isDark ? "dark" : "light");
-        applyTheme(isDark);
-        selectLineSegments(movements.length, movements.length);
-      });
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+      gizmo.render();
+    }
 
-      function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
-        gizmo.render();
-      }
+    window.addEventListener("resize", function () {
+      const viewerWidth = viewer.clientWidth;
+      const viewerHeight = viewer.clientHeight;
+      const newAspect = viewerWidth / viewerHeight;
 
-      window.addEventListener("resize", function () {
-        const viewerWidth = viewer.clientWidth;
-        const viewerHeight = viewer.clientHeight;
-        const newAspect = viewerWidth / viewerHeight;
+      const viewSize = camera.top - camera.bottom;
+      camera.left = (-viewSize * newAspect) / 2;
+      camera.right = (viewSize * newAspect) / 2;
+      camera.updateProjectionMatrix();
 
-        const viewSize = camera.top - camera.bottom;
-        camera.left = (-viewSize * newAspect) / 2;
-        camera.right = (viewSize * newAspect) / 2;
-        camera.updateProjectionMatrix();
+      renderer.setSize(viewerWidth, viewerHeight);
+      gizmo.update();
+    });
 
-        renderer.setSize(viewerWidth, viewerHeight);
-        gizmo.update();
-      });
+    function update3DViewColors() {
+      const computedStyles = getComputedStyle(document.body);
+      const tempColor = new THREE.Color();
+      const getHexFromVar = (varName, fallbackColor) => {
+        const colorString = computedStyles.getPropertyValue(varName).trim();
+        if (!colorString) return fallbackColor;
+        return tempColor.set(colorString).getHex();
+      };
 
+      // Overwrite the global colors object for the 3D view
+      colors.feedColor = getHexFromVar('--vscode-editor-foreground', 0x000000);
+      colors.rapidColor = getHexFromVar('--vscode-gitDecoration-modifiedResourceForeground', 0x0000ff);
+      colors.selectedColor = getHexFromVar('--vscode-editor-selectionBackground', 0x888888);
+      colors.afterSelColor = getHexFromVar('--vscode-editor-inactiveSelectionBackground', 0x444444);
+
+      // Overwrite the renderer background
+      const bgColor = computedStyles.getPropertyValue('--vscode-editor-background').trim();
+      renderer.setClearColor(new THREE.Color(bgColor));
+    }
+
+    function runWhenStylesAreReady(callback) {
+      const check = () => {
+        const styles = getComputedStyle(document.body);
+        const foreground = styles.getPropertyValue('--vscode-editor-foreground');
+        const background = styles.getPropertyValue('--vscode-editor-background');
+        if (foreground.trim() && background.trim()) {
+          callback();
+        } else {
+          setTimeout(check, 100);
+        }
+      };
+      check();
+    }
+
+    runWhenStylesAreReady(() => {
+      update3DViewColors(); // Apply VS Code theme to 3D view
       resetCamera();
       vscode.postMessage({ type: "webviewReady" });
       animate();
-    </script>
-  </body>
+    });
+
+  </script>
+</body>
+
 </html>
