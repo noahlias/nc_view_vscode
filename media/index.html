@@ -130,6 +130,18 @@
     const segmentsGroup = new THREE.Group();
     scene.add(segmentsGroup);
 
+    const startPointGeometry = new THREE.SphereGeometry(1, 32, 32);
+    const startPointMaterial = new THREE.MeshBasicMaterial({ color: 0x39ff14 });
+    const startPointMesh = new THREE.Mesh(startPointGeometry, startPointMaterial);
+    startPointMesh.visible = false;
+    scene.add(startPointMesh);
+
+    const endPointGeometry = new THREE.SphereGeometry(1, 32, 32);
+    const endPointMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const endPointMesh = new THREE.Mesh(endPointGeometry, endPointMaterial);
+    endPointMesh.visible = false;
+    scene.add(endPointMesh);
+
     const aspect = viewer.clientWidth / viewer.clientHeight;
     const f0 = 20000;
     const camera = new THREE.OrthographicCamera(
@@ -384,6 +396,8 @@
         lineSegmentsMesh.material.dispose();
         lineSegmentsMesh = null;
       }
+      startPointMesh.visible = false;
+      endPointMesh.visible = false;
 
       const axisLines = [];
       scene.traverse((child) => {
@@ -494,11 +508,22 @@
       colorAttr.needsUpdate = true;
 
       if (startIdx < movements.length - 1) {
+        const startPos = new THREE.Vector3(
+          movements[startIdx].X,
+          movements[startIdx].Y,
+          movements[startIdx].Z,
+        );
         const endPos = new THREE.Vector3(
           movements[endIdx + 1].X,
           movements[endIdx + 1].Y,
           movements[endIdx + 1].Z,
         );
+
+        startPointMesh.position.copy(startPos);
+        endPointMesh.position.copy(endPos);
+
+        startPointMesh.visible = true;
+        endPointMesh.visible = true;
 
         document.getElementById("posX").textContent =
           movements[endIdx + 1].X.toFixed(3);
@@ -507,6 +532,8 @@
         document.getElementById("posZ").textContent =
           movements[endIdx + 1].Z.toFixed(3);
       } else {
+        startPointMesh.visible = false;
+        endPointMesh.visible = false;
         document.getElementById("posX").textContent = "0.000";
         document.getElementById("posY").textContent = "0.000";
         document.getElementById("posZ").textContent = "0.000";
@@ -523,6 +550,11 @@
     function animate() {
       requestAnimationFrame(animate);
       controls.update();
+      if (startPointMesh.visible) {
+        const pointSize = (size / 200) / camera.zoom;
+        startPointMesh.scale.set(pointSize, pointSize, pointSize);
+        endPointMesh.scale.set(pointSize, pointSize, pointSize);
+      }
       renderer.render(scene, camera);
       gizmo.render();
     }
@@ -555,6 +587,9 @@
       colors.rapidColor = getHexFromVar('--vscode-gitDecoration-modifiedResourceForeground', 0x0000ff);
       colors.selectedColor = getHexFromVar('--vscode-editor-selectionBackground', 0x888888);
       colors.afterSelColor = getHexFromVar('--vscode-editor-inactiveSelectionBackground', 0x444444);
+
+      startPointMaterial.color.setHex(colors.feedColor);
+      endPointMaterial.color.setHex(colors.rapidColor);
 
       // Overwrite the renderer background
       const bgColor = computedStyles.getPropertyValue('--vscode-editor-background').trim();
