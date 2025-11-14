@@ -55,12 +55,75 @@
       margin-bottom: 4px;
     }
 
+    .playback-panel {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background-color: var(--vscode-sideBar-background);
+      border: 1px solid var(--vscode-editorWidget-border);
+      border-radius: 999px;
+      box-shadow: 0 4px 12px var(--vscode-widget-shadow);
+    }
+
+    .viewer-button {
+      border: none;
+      border-radius: 12px;
+      padding: 6px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--vscode-button-foreground);
+      background-color: var(--vscode-button-background);
+      border: 1px solid var(--vscode-button-border, var(--vscode-button-background));
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .viewer-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .viewer-button:not(:disabled):hover {
+      transform: translateY(-1px);
+      background-color: var(--vscode-button-hoverBackground, var(--vscode-button-background));
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8rem;
+    }
+
+    .speed-select {
+      font-size: 0.85rem;
+      border-radius: 999px;
+      padding: 4px 8px;
+      border: 1px solid var(--vscode-input-border, var(--vscode-editorWidget-border));
+      background: var(--vscode-input-background);
+      color: var(--vscode-input-foreground, var(--vscode-editor-foreground));
+    }
+
+    .speed-select:focus {
+      outline: 1px solid var(--vscode-focusBorder);
+    }
+
+    .speed-select option {
+      background: var(--vscode-editor-background);
+      color: var(--vscode-editor-foreground);
+    }
+
     #viewerSlider {
       position: absolute;
-      bottom: 10px;
+      bottom: 18px;
       left: 50%;
       transform: translateX(-50%);
-      width: 60%;
+      width: 75%;
       height: 10px;
       background-color: var(--vscode-input-background);
       -webkit-appearance: none;
@@ -100,6 +163,21 @@
         <span>X: <span id="posX">0.000</span></span>
         <span>Y: <span id="posY">0.000</span></span>
         <span>Z: <span id="posZ">0.000</span></span>
+      </div>
+      <div class="playback-panel" aria-label="Simulation playback">
+        <button id="playButton" class="viewer-button" type="button" aria-pressed="false">
+          Play
+        </button>
+        <label for="playbackSpeed" class="speed-control">
+          <span>Speed</span>
+          <select id="playbackSpeed" class="speed-select">
+            <option value="0.25">0.25×</option>
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="2">2×</option>
+            <option value="4">4×</option>
+          </select>
+        </label>
       </div>
       <input type="range" id="viewerSlider" min="0" max="100" value="0" step="1" />
     </div>
@@ -252,9 +330,11 @@
               });
 
               highlightLineSegmentsForLine(lineIdx);
+              stopPlayback();
               slider.value = segmentIndex;
             }
           } else {
+            stopPlayback();
             slider.value = 0;
             selectLineSegments(movements.length, movements.length);
           }
@@ -263,6 +343,11 @@
     });
 
     function highlightLineInViewer(lineNumber) {
+      const shouldStop = !pendingPlaybackCursorSync;
+      pendingPlaybackCursorSync = false;
+      if (shouldStop) {
+        stopPlayback();
+      }
       let startIdx = -1;
       let endIdx = -1;
 
@@ -297,6 +382,7 @@
       }
     }
     function processGCode(gcode, excludeCodes, isInitialLoad = true) {
+      stopPlayback();
       clearSceneLines();
 
       movements = parseGCode(gcode, undefined, excludeCodes);
@@ -348,8 +434,9 @@
       segmentsGroup.add(lineSegmentsMesh);
 
       slider.value = 0;
-      slider.max = movements.length - 1;
+      slider.max = Math.max(movements.length - 2, 0);
       selectLineSegments(movements.length, movements.length);
+      updatePlaybackControlsState();
       if (isInitialLoad) {
         resetCamera();
       }
@@ -410,27 +497,137 @@
     }
 
     const slider = document.getElementById("viewerSlider");
+    const playButton = document.getElementById("playButton");
+    const speedSelect = document.getElementById("playbackSpeed");
+    let playbackTimer = null;
+    const playbackBaseIntervalMs = 80;
+    let playbackSpeed = parseFloat(speedSelect.value) || 1;
+    let pendingPlaybackCursorSync = false;
+
+    playButton.disabled = true;
+    speedSelect.disabled = true;
 
     slider.addEventListener("input", (event) => {
-      const value = parseInt(event.target.value, 10);
+      stopPlayback();
+      updateSelectionFromSlider(event.target.value);
+    });
 
-      if (value >= 0 && value < movements.length - 1) {
-        const startIdx = value;
-        const endIdx = value;
-        selectLineSegments(startIdx, endIdx);
-        // 获取对应的行号并通知VS Code
-        if (
-          movements[value + 1] &&
-          movements[value + 1].lineNumber !== undefined
-        ) {
-          const lineNumber = movements[value + 1].lineNumber;
-          vscode.postMessage({
-            type: "highlightLine",
-            lineNumber: lineNumber,
-          });
-        }
+    playButton.addEventListener("click", () => {
+      if (playbackTimer) {
+        stopPlayback();
+      } else {
+        startPlayback();
       }
     });
+
+    speedSelect.addEventListener("change", () => {
+      const selectedSpeed = parseFloat(speedSelect.value);
+      if (!Number.isFinite(selectedSpeed) || selectedSpeed <= 0) {
+        speedSelect.value = playbackSpeed.toString();
+        return;
+      }
+
+      playbackSpeed = selectedSpeed;
+
+      if (playbackTimer) {
+        stopPlayback({ resetButton: false });
+        startPlayback();
+      }
+    });
+
+    function updateSelectionFromSlider(value, { emitHighlight = true, source = "user" } = {}) {
+      const numericValue = parseInt(value, 10);
+      if (
+        Number.isNaN(numericValue) ||
+        numericValue < 0 ||
+        numericValue >= movements.length - 1
+      ) {
+        return;
+      }
+
+      selectLineSegments(numericValue, numericValue);
+
+      if (
+        emitHighlight &&
+        movements[numericValue + 1] &&
+        movements[numericValue + 1].lineNumber !== undefined
+      ) {
+        if (source === "playback") {
+          pendingPlaybackCursorSync = true;
+        }
+        vscode.postMessage({
+          type: "highlightLine",
+          lineNumber: movements[numericValue + 1].lineNumber,
+        });
+      }
+    }
+
+    function updatePlaybackControlsState() {
+      const hasMovements = movements.length > 1;
+      playButton.disabled = !hasMovements;
+      speedSelect.disabled = !hasMovements;
+      if (!hasMovements) {
+        slider.value = 0;
+        stopPlayback();
+      }
+    }
+
+    function startPlayback() {
+      if (playbackTimer || movements.length <= 1) {
+        return;
+      }
+
+      pendingPlaybackCursorSync = false;
+      const maxSegmentIdx = Math.max(0, movements.length - 2);
+      let currentValue = parseInt(slider.value, 10);
+      if (Number.isNaN(currentValue) || currentValue >= maxSegmentIdx) {
+        slider.value = 0;
+        currentValue = 0;
+        updateSelectionFromSlider(currentValue, { source: "playback" });
+      }
+
+      setPlayButtonState(true);
+
+      playbackTimer = setInterval(() => {
+        const maxIdx = Math.max(0, movements.length - 2);
+        let sliderValue = parseInt(slider.value, 10);
+        if (Number.isNaN(sliderValue)) sliderValue = 0;
+
+        if (sliderValue >= maxIdx) {
+          stopPlayback();
+          return;
+        }
+
+        const nextValue = sliderValue + 1;
+        slider.value = nextValue;
+        updateSelectionFromSlider(nextValue, { source: "playback" });
+
+        if (nextValue >= maxIdx) {
+          stopPlayback();
+        }
+      }, getPlaybackDelay());
+    }
+
+    function stopPlayback({ resetButton = true } = {}) {
+      if (playbackTimer) {
+        clearInterval(playbackTimer);
+        playbackTimer = null;
+      }
+
+      if (resetButton) {
+        setPlayButtonState(false);
+      }
+    }
+
+    function getPlaybackDelay() {
+      const speed = playbackSpeed > 0 ? playbackSpeed : 1;
+      return playbackBaseIntervalMs / speed;
+    }
+
+    function setPlayButtonState(isPlaying) {
+      playButton.textContent = isPlaying ? "Pause" : "Play";
+      playButton.setAttribute("aria-pressed", isPlaying ? "true" : "false");
+    }
 
     function addAxisLines(box) {
       const marginFactor = 0.2;
