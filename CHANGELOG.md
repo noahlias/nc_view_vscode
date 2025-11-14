@@ -11,7 +11,7 @@ to structure this file.
 
 ### Added
 
-- **PlayBack Controls:** Added play, pause, and stop buttons to control the
+- **Playback Controls:** Added play, pause, and stop buttons to control the
   simulation of the toolpath rendering.
 
 ## [0.0.6] - 2025-09-28
