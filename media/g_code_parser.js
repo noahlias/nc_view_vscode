@@ -1,3 +1,122 @@
+const MACRO_EXPR_ALLOWED = /^[0-9+\-*/().\s]+$/;
+const MIN_ARC_SEGMENTS = 12;
+const MAX_ARC_SEGMENTS = 2048;
+const MAX_ARC_SEGMENT_LENGTH = 0.75; // roughly 0.75 units per chord
+const MAX_ARC_SEGMENT_ANGLE = (5 * Math.PI) / 180; // 5 degrees
+
+function computeArcSegments(radius, sweep, baseSegments = 64) {
+  const absRadius = Math.abs(radius);
+  const absSweep = Math.abs(sweep);
+  if (!Number.isFinite(absRadius) || !Number.isFinite(absSweep) || absRadius === 0) {
+    return baseSegments;
+  }
+
+  const arcLength = absSweep * absRadius;
+  const segmentsByLength = arcLength / MAX_ARC_SEGMENT_LENGTH;
+  const segmentsByAngle = absSweep / MAX_ARC_SEGMENT_ANGLE;
+  const desired = Math.max(baseSegments, segmentsByLength, segmentsByAngle);
+  return Math.min(MAX_ARC_SEGMENTS, Math.max(MIN_ARC_SEGMENTS, Math.ceil(desired)));
+}
+
+function evaluateMacroExpression(expr, rParameters) {
+  if (!expr) return 0;
+  const substituted = expr.replace(/R(\d+)/gi, (_, idx) => {
+    const value = rParameters[idx];
+    return Number.isFinite(value) ? value : 0;
+  });
+
+  if (!MACRO_EXPR_ALLOWED.test(substituted)) {
+    const fallback = Number(substituted);
+    return Number.isFinite(fallback) ? fallback : 0;
+  }
+
+  try {
+    // eslint-disable-next-line no-new-func
+    const value = Function(`"use strict"; return (${substituted});`)();
+    return Number.isFinite(value) ? value : 0;
+  } catch (error) {
+    console.warn("Failed to evaluate macro expression", expr, error);
+    return 0;
+  }
+}
+
+function tryProcessRParamAssignment(line, rParameters) {
+  const assignmentMatch = line.match(/^R(\d+)\s*=\s*(.+)$/i);
+  if (!assignmentMatch) return false;
+
+  const [, index, rawExpr] = assignmentMatch;
+  const expression = rawExpr.replace(/;.*/, "").trim();
+  if (!expression) {
+    rParameters[index] = 0;
+    return true;
+  }
+
+  const value = evaluateMacroExpression(expression, rParameters);
+  rParameters[index] = Number.isFinite(value) ? value : 0;
+  return true;
+}
+
+function extractParametersFromLine(line, rParameters) {
+  const params = {};
+  let idx = 0;
+
+  const isLetter = (char) => char >= "A" && char <= "Z";
+
+  while (idx < line.length) {
+    const char = line[idx];
+    if (!isLetter(char)) {
+      idx += 1;
+      continue;
+    }
+
+    const letter = char;
+    idx += 1;
+
+    if (line[idx] === "=") {
+      idx += 1;
+    }
+
+    let buffer = "";
+    const allowMacroLetters = Boolean(line[idx - 1] === "=");
+
+    while (idx < line.length) {
+      const current = line[idx];
+
+      if (isLetter(current)) {
+        const next = line[idx + 1] ?? "";
+        const looksLikeMacroRef =
+          allowMacroLetters &&
+          current === "R" &&
+          (next >= "0" || next === "(" || next === "+" || next === "-");
+
+        if (!looksLikeMacroRef) {
+          break;
+        }
+      }
+
+      buffer += current;
+      idx += 1;
+    }
+
+    const rawValue = buffer.trim();
+    if (!rawValue) {
+      continue;
+    }
+
+    const numericValue = evaluateMacroExpression(rawValue, rParameters);
+    if (!Number.isFinite(numericValue)) {
+      continue;
+    }
+
+    if (!params[letter]) {
+      params[letter] = [];
+    }
+    params[letter].push(numericValue);
+  }
+
+  return params;
+}
+
 function parseGCode(
   gcode,
   segmentCount = 64,
@@ -5,6 +124,7 @@ function parseGCode(
 ) {
   const lines = gcode.split("\n");
   const movements = [];
+  const rParameters = {};
 
   let currentPosition = { X: 0, Y: 0, Z: 0 };
   let currentCommand = "G0";
@@ -30,25 +150,28 @@ function parseGCode(
   );
 
   for (let i = 0; i < lines.length; i++) {
-    let line = lines[i].trim().toUpperCase();
-    if (line.startsWith(";") || line.startsWith("(") || line.startsWith("%") || line === "") continue;
+    let line = lines[i].trim();
+    if (line === "") continue;
+    if (line.startsWith(";") || line.startsWith("(") || line.startsWith("%")) continue;
+
     line = line.replace(/;.*$/, "").trim();
+    if (line === "") continue;
+
+    const upperLine = line.toUpperCase();
+
+    if (tryProcessRParamAssignment(upperLine, rParameters)) {
+      continue;
+    }
 
     if (
       excludeCodes.some((code) =>
-        line.match(new RegExp(`\\b${code}(\\s|$)`, "i")),
+        upperLine.match(new RegExp(`\\b${code}(\\s|$)`, "i")),
       )
     ) {
       continue;
     }
 
-    const tokens = [...line.matchAll(/([A-Z])([-+]?[0-9]*\.?[0-9]+)/g)];
-    const params = {};
-
-    for (const [, letter, value] of tokens) {
-      if (!params[letter]) params[letter] = [];
-      params[letter].push(parseFloat(value));
-    }
+    const params = extractParametersFromLine(upperLine, rParameters);
 
     const gCodes = params["G"] || [];
     for (const g of gCodes) {
@@ -168,9 +291,11 @@ function parseGCode(
       const dOrthogonal =
         target[orthogonalAxis] - currentPosition[orthogonalAxis];
 
-      for (let j = 1; j <= segmentCount; j++) {
-        const angle = startAngle + (sweep * j) / segmentCount;
-        const ratio = j / segmentCount;
+      const arcSegments = computeArcSegments(radius, sweep, segmentCount);
+
+      for (let j = 1; j <= arcSegments; j++) {
+        const angle = startAngle + (sweep * j) / arcSegments;
+        const ratio = j / arcSegments;
         const point = { ...currentPosition };
 
         point[axisA] = centerA + radius * Math.cos(angle);

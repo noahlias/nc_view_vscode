@@ -2,17 +2,36 @@
 
 ![demo](assets/demo.jpg)
 
-A Visual Studio Code extension for viewing NC/G-code files with interactive 3D visualization.
+A Visual Studio Code extension for viewing NC/G-code files with interactive 3D
+visualization.
 
 ## Features
 
-- ✨ **Integrated Preview** - Open a 3D preview of your G-code directly in the editor.
-- 🚀 **Quick Access** - Launch the viewer with a dedicated icon in the editor title bar or with a keyboard shortcut.
-- ⌨️ **Keyboard Shortcut** - Use `Ctrl+K V` to open the preview, just like with Markdown files.
-- 🎯 **Offline & Secure** - Works without an internet connection and opens files directly from your workspace. No file uploads.
+- ✨ **Integrated Preview** - Open a 3D preview of your G-code directly in the
+  editor.
+- 🚀 **Quick Access** - Launch the viewer with a dedicated icon in the editor
+  title bar or with a keyboard shortcut.
+- ⌨️ **Keyboard Shortcut** - Use `Ctrl+K V` to open the preview, just like with
+  Markdown files.
+- 🎯 **Offline & Secure** - Works without an internet connection and opens files
+  directly from your workspace. No file uploads.
 - 🎨 **3D Path Visualization** - Interactive Three.js rendering of toolpaths.
 - 🌙 **Dark/Light Themes** - Automatically matches your VS Code theme.
-- 📊 **Real-time Position Tracking** - See current X/Y/Z coordinates as you scrub through the timeline.
+- 📊 **Real-time Position Tracking** - See current X/Y/Z coordinates as you
+  scrub through the timeline.
+- 🧮 **Sinumerik Macro Awareness** - Evaluates R-parameters and variable
+  expressions so macro-driven programs preview correctly. See the curated
+  programs in `examples/sinumerik_macro/` for ready-to-run samples you can use
+  to verify macro behavior inside the viewer.
+
+## Macro programming samples
+
+Looking for quick Sinumerik-style R-parameter programs to verify the macro
+interpreter? Load the pair of curated routines under
+`examples/sinumerik_macro/`:
+
+Each program is annotated so you can tweak centers, radii, feeds, and depths and
+immediately observe the effect inside the renderer.
 
 ## Usage
 
@@ -27,8 +46,9 @@ Install from the VS Code Marketplace or build from source.
 
 ## Credits
 
-This extension is inspired by [NCviewer](https://github.com/NCalu/NCviewer) by NCalu.
-Thanks for the excellent web-based G-code viewer that made this VS Code integration possible!
+This extension is inspired by [NCviewer](https://github.com/NCalu/NCviewer) by
+NCalu. Thanks for the excellent web-based G-code viewer that made this VS Code
+integration possible!
 
 ## License
 

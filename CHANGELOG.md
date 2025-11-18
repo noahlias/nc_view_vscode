@@ -7,6 +7,13 @@ to structure this file.
 
 ## [Unreleased]
 
+## [0.0.8] - 2025-11-18
+
+### Added
+
+- **Curated Sinumerik Macro Samples:** Replaced the scattered sample set with a
+  curated collection of Sinumerik macro programs for easier access and testing.
+
 ## 0.0.7 - 2025-11-14
 
 ### Added
