@@ -13,6 +13,17 @@ A Visual Studio Code extension for viewing NC/G-code files with interactive 3D v
 - 🎨 **3D Path Visualization** - Interactive Three.js rendering of toolpaths.
 - 🌙 **Dark/Light Themes** - Automatically matches your VS Code theme.
 - 📊 **Real-time Position Tracking** - See current X/Y/Z coordinates as you scrub through the timeline.
+- 🧮 **Sinumerik Macro Awareness** - Evaluates R-parameters and variable expressions so macro-driven programs preview correctly. See the curated programs in `examples/sinumerik_macro/` for ready-to-run samples you can use to verify macro behavior inside the viewer.
+
+## Macro programming samples
+
+Looking for quick Sinumerik-style R-parameter programs to verify the macro interpreter? Load the numbered examples under `examples/sinumerik_macro/` to work from simple to complex routines:
+
+1. `01_basic_square_pocket.nc` – A square-pocket routine that sets up toolpath dimensions entirely through `R` values.
+2. `02_drilling_array.nc` – A drilling grid that increments `R` values between canned cycles to mimic micro programming loops.
+3. `03_helical_entry.nc` – A helical entry move that derives radii from expressions involving multiple parameters.
+
+Each program is annotated so you can tweak parameters and immediately observe the effect inside the renderer.
 
 ## Usage
 

@@ -2,7 +2,7 @@
   "name": "nc-view",
   "displayName": "NC Viewer",
   "description": "Interactive 3D G-code viewer for VS Code",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "engines": {
     "vscode": "^1.103.0"
   },

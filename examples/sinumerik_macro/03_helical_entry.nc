@@ -1,0 +1,12 @@
+%; SINUMERIK MACRO TEST - HELICAL ENTRY
+(Helical entry using expressions to derive radii)
+R40=25 ; finish radius
+R41=R40+5
+R42=6
+G0 X0 Y0 Z20
+G1 Z0 F300
+G17 G3 X=R40 Y0 Z-10 I=R40 J0 F400
+G3 X=R41 Y0 I=R41 J0
+G1 Z5
+G0 Z50
+M30

@@ -1,3 +1,92 @@
+const MACRO_EXPR_ALLOWED = /^[0-9+\-*/().\s]+$/;
+
+function evaluateMacroExpression(expr, rParameters) {
+  if (!expr) return 0;
+  const substituted = expr.replace(/R(\d+)/gi, (_, idx) => {
+    const value = rParameters[idx];
+    return Number.isFinite(value) ? value : 0;
+  });
+
+  if (!MACRO_EXPR_ALLOWED.test(substituted)) {
+    const fallback = Number(substituted);
+    return Number.isFinite(fallback) ? fallback : 0;
+  }
+
+  try {
+    // eslint-disable-next-line no-new-func
+    const value = Function(`"use strict"; return (${substituted});`)();
+    return Number.isFinite(value) ? value : 0;
+  } catch (error) {
+    console.warn("Failed to evaluate macro expression", expr, error);
+    return 0;
+  }
+}
+
+function tryProcessRParamAssignment(line, rParameters) {
+  const assignmentMatch = line.match(/^R(\d+)\s*=\s*(.+)$/i);
+  if (!assignmentMatch) return false;
+
+  const [, index, rawExpr] = assignmentMatch;
+  const expression = rawExpr.replace(/;.*/, "").trim();
+  if (!expression) {
+    rParameters[index] = 0;
+    return true;
+  }
+
+  const value = evaluateMacroExpression(expression, rParameters);
+  rParameters[index] = Number.isFinite(value) ? value : 0;
+  return true;
+}
+
+function extractParametersFromLine(line, rParameters) {
+  const params = {};
+  let idx = 0;
+
+  const isLetter = (char) => char >= "A" && char <= "Z";
+
+  while (idx < line.length) {
+    const char = line[idx];
+    if (!isLetter(char)) {
+      idx += 1;
+      continue;
+    }
+
+    const letter = char;
+    idx += 1;
+
+    if (line[idx] === "=") {
+      idx += 1;
+    }
+
+    let buffer = "";
+    while (idx < line.length) {
+      const current = line[idx];
+      if (isLetter(current)) {
+        break;
+      }
+      buffer += current;
+      idx += 1;
+    }
+
+    const rawValue = buffer.trim();
+    if (!rawValue) {
+      continue;
+    }
+
+    const numericValue = evaluateMacroExpression(rawValue, rParameters);
+    if (!Number.isFinite(numericValue)) {
+      continue;
+    }
+
+    if (!params[letter]) {
+      params[letter] = [];
+    }
+    params[letter].push(numericValue);
+  }
+
+  return params;
+}
+
 function parseGCode(
   gcode,
   segmentCount = 64,
@@ -5,6 +94,7 @@ function parseGCode(
 ) {
   const lines = gcode.split("\n");
   const movements = [];
+  const rParameters = {};
 
   let currentPosition = { X: 0, Y: 0, Z: 0 };
   let currentCommand = "G0";
@@ -30,25 +120,28 @@ function parseGCode(
   );
 
   for (let i = 0; i < lines.length; i++) {
-    let line = lines[i].trim().toUpperCase();
-    if (line.startsWith(";") || line.startsWith("(") || line.startsWith("%") || line === "") continue;
+    let line = lines[i].trim();
+    if (line === "") continue;
+    if (line.startsWith(";") || line.startsWith("(") || line.startsWith("%")) continue;
+
     line = line.replace(/;.*$/, "").trim();
+    if (line === "") continue;
+
+    const upperLine = line.toUpperCase();
+
+    if (tryProcessRParamAssignment(upperLine, rParameters)) {
+      continue;
+    }
 
     if (
       excludeCodes.some((code) =>
-        line.match(new RegExp(`\\b${code}(\\s|$)`, "i")),
+        upperLine.match(new RegExp(`\\b${code}(\\s|$)`, "i")),
       )
     ) {
       continue;
     }
 
-    const tokens = [...line.matchAll(/([A-Z])([-+]?[0-9]*\.?[0-9]+)/g)];
-    const params = {};
-
-    for (const [, letter, value] of tokens) {
-      if (!params[letter]) params[letter] = [];
-      params[letter].push(parseFloat(value));
-    }
+    const params = extractParametersFromLine(upperLine, rParameters);
 
     const gCodes = params["G"] || [];
     for (const g of gCodes) {

@@ -7,6 +7,12 @@ to structure this file.
 
 ## [Unreleased]
 
+## [0.0.8] - 2025-11-15
+
+### Added
+
+- **Sinumerik Macro Samples:** Replaced the single `testdata/sinumerik_macro_samples.nc` file with an ordered set of programs under `examples/sinumerik_macro/` so users can step through macro behavior from basic to advanced routines, along with refreshed README guidance.
+
 ## 0.0.7 - 2025-11-14
 
 ### Added
