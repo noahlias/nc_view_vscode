@@ -13,6 +13,7 @@ to structure this file.
 
 - **Sinumerik Macro Samples:** Replaced the single `testdata/sinumerik_macro_samples.nc` file with an ordered set of programs under `examples/sinumerik_macro/` so users can step through macro behavior from basic to advanced routines, along with refreshed README guidance.
 - **Advanced Macro Geometry:** Added rectangular finishing and regular-octagon profiling examples so macro-driven rectangles, chamfers, and polygonal shapes can be visualized alongside the existing pocket, drilling, and helical cases.
+- **Arc-Rich Macro Sample:** Added `06_bore_arc_array.nc`, a literal twin-bore routine that keeps the exact Sinumerik-style arc blocks while still exposing the feeds, depths, and centers through `R` parameters so you can validate multi-line programs that mix macro math with G2/G3 moves.
 
 ## 0.0.7 - 2025-11-14
 

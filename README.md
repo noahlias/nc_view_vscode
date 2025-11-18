@@ -24,6 +24,7 @@ Looking for quick Sinumerik-style R-parameter programs to verify the macro inter
 3. `03_helical_entry.nc` – A helical entry move that derives radii from expressions involving multiple parameters.
 4. `04_parametric_rectangle.nc` – A finishing routine that grows or shrinks a rectangular boss plus its lead-ins using only `R` assignments.
 5. `05_variable_octagon.nc` – A regular-octagon profile whose chamfer widths and approach moves come from arithmetic on the macro values.
+6. `06_bore_arc_array.nc` – A literal two-bore program with circular `G3` moves where the centers, depths, and feeds are adjustable via `R` parameters so you can compare against real-world NC output that repeats each line.
 
 Each program is annotated so you can tweak parameters and immediately observe the effect inside the renderer.
 
