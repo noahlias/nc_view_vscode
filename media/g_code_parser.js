@@ -59,11 +59,23 @@ function extractParametersFromLine(line, rParameters) {
     }
 
     let buffer = "";
+    const allowMacroLetters = Boolean(line[idx - 1] === "=");
+
     while (idx < line.length) {
       const current = line[idx];
+
       if (isLetter(current)) {
-        break;
+        const next = line[idx + 1] ?? "";
+        const looksLikeMacroRef =
+          allowMacroLetters &&
+          current === "R" &&
+          (next >= "0" || next === "(" || next === "+" || next === "-");
+
+        if (!looksLikeMacroRef) {
+          break;
+        }
       }
+
       buffer += current;
       idx += 1;
     }

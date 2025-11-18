@@ -7,6 +7,12 @@ to structure this file.
 
 ## [Unreleased]
 
+## [0.0.9] - 2025-11-16
+
+### Fixed
+
+- **Macro Expressions With R Variables:** Corrected the parser so expressions like `X=R3+R4` keep their `R` references during evaluation instead of truncating at the first letter, restoring the intended multi-segment toolpaths for the Sinumerik samples.
+
 ## [0.0.8] - 2025-11-15
 
 ### Added
