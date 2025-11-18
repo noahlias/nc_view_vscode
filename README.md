@@ -2,31 +2,43 @@
 
 ![demo](assets/demo.jpg)
 
-A Visual Studio Code extension for viewing NC/G-code files with interactive 3D visualization.
+A Visual Studio Code extension for viewing NC/G-code files with interactive 3D
+visualization.
 
 ## Features
 
-- ✨ **Integrated Preview** - Open a 3D preview of your G-code directly in the editor.
-- 🚀 **Quick Access** - Launch the viewer with a dedicated icon in the editor title bar or with a keyboard shortcut.
-- ⌨️ **Keyboard Shortcut** - Use `Ctrl+K V` to open the preview, just like with Markdown files.
-- 🎯 **Offline & Secure** - Works without an internet connection and opens files directly from your workspace. No file uploads.
+- ✨ **Integrated Preview** - Open a 3D preview of your G-code directly in the
+  editor.
+- 🚀 **Quick Access** - Launch the viewer with a dedicated icon in the editor
+  title bar or with a keyboard shortcut.
+- ⌨️ **Keyboard Shortcut** - Use `Ctrl+K V` to open the preview, just like with
+  Markdown files.
+- 🎯 **Offline & Secure** - Works without an internet connection and opens files
+  directly from your workspace. No file uploads.
 - 🎨 **3D Path Visualization** - Interactive Three.js rendering of toolpaths.
 - 🌙 **Dark/Light Themes** - Automatically matches your VS Code theme.
-- 📊 **Real-time Position Tracking** - See current X/Y/Z coordinates as you scrub through the timeline.
-- 🧮 **Sinumerik Macro Awareness** - Evaluates R-parameters and variable expressions so macro-driven programs preview correctly. See the curated programs in `examples/sinumerik_macro/` for ready-to-run samples you can use to verify macro behavior inside the viewer.
+- 📊 **Real-time Position Tracking** - See current X/Y/Z coordinates as you
+  scrub through the timeline.
+- 🧮 **Sinumerik Macro Awareness** - Evaluates R-parameters and variable
+  expressions so macro-driven programs preview correctly. See the curated
+  programs in `examples/sinumerik_macro/` for ready-to-run samples you can use
+  to verify macro behavior inside the viewer.
 
 ## Macro programming samples
 
-Looking for quick Sinumerik-style R-parameter programs to verify the macro interpreter? Load the numbered examples under `examples/sinumerik_macro/` to work from simple to complex routines:
+Looking for quick Sinumerik-style R-parameter programs to verify the macro
+interpreter? Load the pair of curated routines under
+`examples/sinumerik_macro/`:
 
-1. `01_basic_square_pocket.nc` – A square-pocket routine that sets up toolpath dimensions entirely through `R` values.
-2. `02_drilling_array.nc` – A drilling grid that increments `R` values between canned cycles to mimic micro programming loops.
-3. `03_helical_entry.nc` – A helical entry move that derives radii from expressions involving multiple parameters.
-4. `04_parametric_rectangle.nc` – A finishing routine that grows or shrinks a rectangular boss plus its lead-ins using only `R` assignments.
-5. `05_variable_octagon.nc` – A regular-octagon profile whose chamfer widths and approach moves come from arithmetic on the macro values.
-6. `06_bore_arc_array.nc` – A literal two-bore program with circular `G3` moves where the centers, depths, and feeds are adjustable via `R` parameters so you can compare against real-world NC output that repeats each line.
+1. `01_layered_donut.nc` – Machines a multi-layer donut with helical ramps,
+   concentric blend passes, and a macro-driven inner bo re so you can watch Z,
+   X, and Y move together.
+2. `02_plate_star_cutout.nc` – Cuts a full rectangular plate with rounded
+   corners before plunging into a macro-defined five-poin t star cut-out and
+   pilot hole for irregular geometry testing.
 
-Each program is annotated so you can tweak parameters and immediately observe the effect inside the renderer.
+Each program is annotated so you can tweak centers, radii, feeds, and depths and
+immediately observe the effect inside the rende rer.
 
 ## Usage
 
@@ -41,8 +53,9 @@ Install from the VS Code Marketplace or build from source.
 
 ## Credits
 
-This extension is inspired by [NCviewer](https://github.com/NCalu/NCviewer) by NCalu.
-Thanks for the excellent web-based G-code viewer that made this VS Code integration possible!
+This extension is inspired by [NCviewer](https://github.com/NCalu/NCviewer) by
+NCalu. Thanks for the excellent web-based G-code viewer that made this VS Code
+integration possible!
 
 ## License
 

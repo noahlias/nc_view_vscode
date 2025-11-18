@@ -11,10 +11,12 @@ to structure this file.
 
 ### Added
 
-- **Macro Expressions With R Variables:** Corrected the parser so expressions
-  like `X=R3+R4` keep their `R` references during evaluation instead of
-  truncating at the first letter, restoring the intended multi-segment toolpaths
-  for the Sinumerik samples.
+- **Curated Sinumerik Macro Samples:** Replaced the scattered sample set with
+  two detailed programs under `examples/sinumerik_ma cro/`—`01_layered_donut.nc`
+  for multi-depth donut machining with helical ramps and Z motion, and
+  `02_plate_star_cutout.nc` for a rectangular plate contour that includes a
+  rounded outline, pilot hole, and five-point star cut-out—so you can
+  immediately load irregular XY geometry with clear coordinate references.
 
 ## 0.0.7 - 2025-11-14
 
