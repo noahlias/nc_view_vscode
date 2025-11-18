@@ -11,12 +11,8 @@ to structure this file.
 
 ### Added
 
-- **Curated Sinumerik Macro Samples:** Replaced the scattered sample set with
-  two detailed programs under `examples/sinumerik_ma cro/`—`01_layered_donut.nc`
-  for multi-depth donut machining with helical ramps and Z motion, and
-  `02_plate_star_cutout.nc` for a rectangular plate contour that includes a
-  rounded outline, pilot hole, and five-point star cut-out—so you can
-  immediately load irregular XY geometry with clear coordinate references.
+- **Curated Sinumerik Macro Samples:** Replaced the scattered sample set with a
+  curated collection of Sinumerik macro programs for easier access and testing.
 
 ## 0.0.7 - 2025-11-14
 

@@ -1,4 +1,22 @@
 const MACRO_EXPR_ALLOWED = /^[0-9+\-*/().\s]+$/;
+const MIN_ARC_SEGMENTS = 12;
+const MAX_ARC_SEGMENTS = 2048;
+const MAX_ARC_SEGMENT_LENGTH = 0.75; // roughly 0.75 units per chord
+const MAX_ARC_SEGMENT_ANGLE = (5 * Math.PI) / 180; // 5 degrees
+
+function computeArcSegments(radius, sweep, baseSegments = 64) {
+  const absRadius = Math.abs(radius);
+  const absSweep = Math.abs(sweep);
+  if (!Number.isFinite(absRadius) || !Number.isFinite(absSweep) || absRadius === 0) {
+    return baseSegments;
+  }
+
+  const arcLength = absSweep * absRadius;
+  const segmentsByLength = arcLength / MAX_ARC_SEGMENT_LENGTH;
+  const segmentsByAngle = absSweep / MAX_ARC_SEGMENT_ANGLE;
+  const desired = Math.max(baseSegments, segmentsByLength, segmentsByAngle);
+  return Math.min(MAX_ARC_SEGMENTS, Math.max(MIN_ARC_SEGMENTS, Math.ceil(desired)));
+}
 
 function evaluateMacroExpression(expr, rParameters) {
   if (!expr) return 0;
@@ -273,9 +291,11 @@ function parseGCode(
       const dOrthogonal =
         target[orthogonalAxis] - currentPosition[orthogonalAxis];
 
-      for (let j = 1; j <= segmentCount; j++) {
-        const angle = startAngle + (sweep * j) / segmentCount;
-        const ratio = j / segmentCount;
+      const arcSegments = computeArcSegments(radius, sweep, segmentCount);
+
+      for (let j = 1; j <= arcSegments; j++) {
+        const angle = startAngle + (sweep * j) / arcSegments;
+        const ratio = j / arcSegments;
         const point = { ...currentPosition };
 
         point[axisA] = centerA + radius * Math.cos(angle);

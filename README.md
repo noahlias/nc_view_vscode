@@ -30,15 +30,8 @@ Looking for quick Sinumerik-style R-parameter programs to verify the macro
 interpreter? Load the pair of curated routines under
 `examples/sinumerik_macro/`:
 
-1. `01_layered_donut.nc` – Machines a multi-layer donut with helical ramps,
-   concentric blend passes, and a macro-driven inner bo re so you can watch Z,
-   X, and Y move together.
-2. `02_plate_star_cutout.nc` – Cuts a full rectangular plate with rounded
-   corners before plunging into a macro-defined five-poin t star cut-out and
-   pilot hole for irregular geometry testing.
-
 Each program is annotated so you can tweak centers, radii, feeds, and depths and
-immediately observe the effect inside the rende rer.
+immediately observe the effect inside the renderer.
 
 ## Usage
 
