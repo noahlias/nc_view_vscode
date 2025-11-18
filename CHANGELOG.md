@@ -7,19 +7,14 @@ to structure this file.
 
 ## [Unreleased]
 
-## [0.0.9] - 2025-11-16
-
-### Fixed
-
-- **Macro Expressions With R Variables:** Corrected the parser so expressions like `X=R3+R4` keep their `R` references during evaluation instead of truncating at the first letter, restoring the intended multi-segment toolpaths for the Sinumerik samples.
-
-## [0.0.8] - 2025-11-15
+## [0.0.8] - 2025-11-18
 
 ### Added
 
-- **Sinumerik Macro Samples:** Replaced the single `testdata/sinumerik_macro_samples.nc` file with an ordered set of programs under `examples/sinumerik_macro/` so users can step through macro behavior from basic to advanced routines, along with refreshed README guidance.
-- **Advanced Macro Geometry:** Added rectangular finishing and regular-octagon profiling examples so macro-driven rectangles, chamfers, and polygonal shapes can be visualized alongside the existing pocket, drilling, and helical cases.
-- **Arc-Rich Macro Sample:** Added `06_bore_arc_array.nc`, a literal twin-bore routine that keeps the exact Sinumerik-style arc blocks while still exposing the feeds, depths, and centers through `R` parameters so you can validate multi-line programs that mix macro math with G2/G3 moves.
+- **Macro Expressions With R Variables:** Corrected the parser so expressions
+  like `X=R3+R4` keep their `R` references during evaluation instead of
+  truncating at the first letter, restoring the intended multi-segment toolpaths
+  for the Sinumerik samples.
 
 ## 0.0.7 - 2025-11-14
 
