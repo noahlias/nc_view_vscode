@@ -22,6 +22,8 @@ Looking for quick Sinumerik-style R-parameter programs to verify the macro inter
 1. `01_basic_square_pocket.nc` – A square-pocket routine that sets up toolpath dimensions entirely through `R` values.
 2. `02_drilling_array.nc` – A drilling grid that increments `R` values between canned cycles to mimic micro programming loops.
 3. `03_helical_entry.nc` – A helical entry move that derives radii from expressions involving multiple parameters.
+4. `04_parametric_rectangle.nc` – A finishing routine that grows or shrinks a rectangular boss plus its lead-ins using only `R` assignments.
+5. `05_variable_octagon.nc` – A regular-octagon profile whose chamfer widths and approach moves come from arithmetic on the macro values.
 
 Each program is annotated so you can tweak parameters and immediately observe the effect inside the renderer.
 
