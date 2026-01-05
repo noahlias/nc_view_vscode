@@ -2,6 +2,7 @@
 ; 2D-only bolt-circle slot array inspired by Siemens SLOT1 nests. Each slot is
 ; cut once at a single engraving depth so the rendered path matches DXF/SVG data.
 
+;@macro begin
 ; --- parameters ---
 R1=0              ; pattern center X
 R2=0              ; pattern center Y
@@ -10,7 +11,7 @@ R4=34             ; slot length
 R5=18             ; slot width
 R6=-3             ; engraving depth
 R7=6              ; safe plane
-R8=50             ; retract plane
+R8=5             ; retract plane
 R9=600            ; plunge feed
 R10=1400          ; contour feed
 
@@ -73,6 +74,12 @@ CALL LBL 20
 R61=R2-R20
 R62=R2-R21
 CALL LBL 20
+;@macro end
+
+; literal R-arc demo
+G17
+G00 X=0 Y=0
+G03 X=20 Y=0 R=10
 
 G00 X=0 Y=0
 M30
