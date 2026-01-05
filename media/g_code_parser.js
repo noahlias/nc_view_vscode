@@ -40,7 +40,8 @@ function evaluateMacroExpression(expr, rParameters) {
   }
 }
 
-function tryProcessRParamAssignment(line, rParameters) {
+function tryProcessRParamAssignment(line, rParameters, macroEnabled) {
+  if (!macroEnabled) return false;
   const assignmentMatch = line.match(/^R(\d+)\s*=\s*(.+)$/i);
   if (!assignmentMatch) return false;
 
@@ -56,7 +57,10 @@ function tryProcessRParamAssignment(line, rParameters) {
   return true;
 }
 
-function extractParametersFromLine(line, rParameters) {
+const NUMERIC_LITERAL = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+const MACRO_DIRECTIVE = /^\s*;\s*@MACRO\s+(BEGIN|END)\b/i;
+
+function extractParametersFromLine(line, rParameters, macroEnabled) {
   const params = {};
   let idx = 0;
 
@@ -103,7 +107,12 @@ function extractParametersFromLine(line, rParameters) {
       continue;
     }
 
-    const numericValue = evaluateMacroExpression(rawValue, rParameters);
+    let numericValue;
+    if (!macroEnabled) {
+      numericValue = NUMERIC_LITERAL.test(rawValue) ? Number(rawValue) : NaN;
+    } else {
+      numericValue = evaluateMacroExpression(rawValue, rParameters);
+    }
     if (!Number.isFinite(numericValue)) {
       continue;
     }
@@ -115,6 +124,68 @@ function extractParametersFromLine(line, rParameters) {
   }
 
   return params;
+}
+
+function chooseArcCenterFromRadius(
+  startA,
+  startB,
+  endA,
+  endB,
+  radiusValue,
+  command,
+) {
+  const radius = Math.abs(radiusValue);
+  const dx = endA - startA;
+  const dy = endB - startB;
+  const chord2 = dx * dx + dy * dy;
+
+  if (!Number.isFinite(radius) || radius === 0 || chord2 === 0) {
+    return null;
+  }
+
+  const chord = Math.sqrt(chord2);
+  const halfChord = chord / 2;
+  if (halfChord > radius) {
+    return null;
+  }
+
+  const mx = (startA + endA) / 2;
+  const my = (startB + endB) / 2;
+  const nx = -dy / chord;
+  const ny = dx / chord;
+  const h = Math.sqrt(Math.max(0, radius * radius - halfChord * halfChord));
+
+  const centers = [
+    { A: mx + h * nx, B: my + h * ny },
+    { A: mx - h * nx, B: my - h * ny },
+  ];
+
+  const sweepFor = (center) => {
+    const startAngle = Math.atan2(startB - center.B, startA - center.A);
+    const endAngle = Math.atan2(endB - center.B, endA - center.A);
+    let sweep = endAngle - startAngle;
+    if (command === "G2" && sweep > 0) sweep -= 2 * Math.PI;
+    if (command === "G3" && sweep < 0) sweep += 2 * Math.PI;
+    return sweep;
+  };
+
+  const candidates = centers.map((center) => ({
+    center,
+    sweep: sweepFor(center),
+  }));
+
+  const preferMajor = radiusValue < 0;
+  const preferredSign = command === "G2" ? -1 : 1;
+  const matching = candidates.filter(
+    (item) => Math.sign(item.sweep || preferredSign) === preferredSign,
+  );
+  const usable = matching.length > 0 ? matching : candidates;
+
+  const sorted = usable.sort((a, b) => Math.abs(a.sweep) - Math.abs(b.sweep));
+  const chosen = preferMajor ? sorted[sorted.length - 1] : sorted[0];
+
+  if (!chosen) return null;
+  return chosen;
 }
 
 function parseGCode(
@@ -132,6 +203,7 @@ function parseGCode(
   let centerMode = null;
   let motionMode = "absolute";
   let plane = "G17";
+  let macroDepth = 0;
 
   const FULL_CIRCLE_TOLERANCE = 1e-6;
   const firstArcDetected = { used: false };
@@ -152,14 +224,26 @@ function parseGCode(
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i].trim();
     if (line === "") continue;
+
+    const macroDirective = line.match(MACRO_DIRECTIVE);
+    if (macroDirective) {
+      if (macroDirective[1].toUpperCase() === "BEGIN") {
+        macroDepth += 1;
+      } else {
+        macroDepth = Math.max(0, macroDepth - 1);
+      }
+      continue;
+    }
+
     if (line.startsWith(";") || line.startsWith("(") || line.startsWith("%")) continue;
 
     line = line.replace(/;.*$/, "").trim();
     if (line === "") continue;
 
     const upperLine = line.toUpperCase();
+    const macroEnabled = macroDepth > 0;
 
-    if (tryProcessRParamAssignment(upperLine, rParameters)) {
+    if (tryProcessRParamAssignment(upperLine, rParameters, macroEnabled)) {
       continue;
     }
 
@@ -171,7 +255,7 @@ function parseGCode(
       continue;
     }
 
-    const params = extractParametersFromLine(upperLine, rParameters);
+    const params = extractParametersFromLine(upperLine, rParameters, macroEnabled);
 
     const gCodes = params["G"] || [];
     for (const g of gCodes) {
@@ -224,21 +308,27 @@ function parseGCode(
       const endB = target[axisB];
 
       let centerA, centerB;
+      let sweepOverride = null;
 
       if (rVal !== undefined) {
-        const dx = endA - startA;
-        const dy = endB - startB;
-        const chord2 = dx * dx + dy * dy;
-        const h = Math.sqrt(Math.max(0, rVal * rVal - chord2 / 4));
-        const dir = currentCommand === "G2" ? -1 : 1;
+        const resolved = chooseArcCenterFromRadius(
+          startA,
+          startB,
+          endA,
+          endB,
+          rVal,
+          currentCommand,
+        );
 
-        const mx = (startA + endA) / 2;
-        const my = (startB + endB) / 2;
-        const nx = -dy / Math.sqrt(chord2);
-        const ny = dx / Math.sqrt(chord2);
+        if (!resolved) {
+          addMove("G1", target.X, target.Y, target.Z, currentFeedrate, i);
+          currentPosition = { ...target };
+          continue;
+        }
 
-        centerA = mx + dir * h * nx;
-        centerB = my + dir * h * ny;
+        centerA = resolved.center.A;
+        centerB = resolved.center.B;
+        sweepOverride = resolved.sweep;
       } else {
         const relCenter = {
           A:
@@ -275,15 +365,17 @@ function parseGCode(
       let endAngle = Math.atan2(endB - centerB, endA - centerA);
       const radius = Math.hypot(startA - centerA, startB - centerB);
 
-      let sweep = endAngle - startAngle;
+      let sweep = sweepOverride ?? endAngle - startAngle;
       const isFullCircle =
         Math.hypot(endA - startA, endB - startB) < FULL_CIRCLE_TOLERANCE;
 
-      if (isFullCircle) {
-        sweep = currentCommand === 'G2' ? -2 * Math.PI : 2 * Math.PI;
-      } else {
-        if (currentCommand === "G2" && sweep > 0) sweep -= 2 * Math.PI;
-        if (currentCommand === "G3" && sweep < 0) sweep += 2 * Math.PI;
+      if (!sweepOverride) {
+        if (isFullCircle) {
+          sweep = currentCommand === "G2" ? -2 * Math.PI : 2 * Math.PI;
+        } else {
+          if (currentCommand === "G2" && sweep > 0) sweep -= 2 * Math.PI;
+          if (currentCommand === "G3" && sweep < 0) sweep += 2 * Math.PI;
+        }
       }
 
       const orthogonalAxis =

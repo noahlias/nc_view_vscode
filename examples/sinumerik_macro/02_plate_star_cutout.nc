@@ -3,6 +3,7 @@
 ; Dimensions mirror Hurco/Sinumerik training plates but everything is machined in
 ; a single engraving plane so the preview matches DXF/SVG art directly.
 
+;@macro begin
 ; --- plate parameters ---
 R1=0              ; origin X
 R2=0              ; origin Y
@@ -64,4 +65,5 @@ G01 X=R1 Y=R2+R20
 G00 Z=R8
 
 G00 X=0 Y=0
+;@macro end
 M30

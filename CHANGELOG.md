@@ -7,6 +7,15 @@ to structure this file.
 
 ## [Unreleased]
 
+## [0.0.9] - 2026-01-05
+
+### Fixed
+
+- **R Arc Rendering:** Improved `R`-radius arc handling for `G2/G3`, including
+  major-arc selection via negative `R` values and safer fallbacks.
+- **Macro Blocks:** Added `;@macro begin/end` directives so macro evaluation
+  only runs within explicit blocks.
+
 ## [0.0.8] - 2025-11-18
 
 ### Added
