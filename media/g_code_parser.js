@@ -330,17 +330,14 @@ function parseGCode(
         centerB = resolved.center.B;
         sweepOverride = resolved.sweep;
       } else {
+        const offsetFor = (key) => key === "I" ? iVal : key === "J" ? jVal : kVal;
         const relCenter = {
-          A:
-            currentPosition[axisA] +
-            (iKey === "I" ? iVal : jKey === "I" ? iVal : kVal),
-          B:
-            currentPosition[axisB] +
-            (jKey === "J" ? jVal : iKey === "J" ? jVal : kVal),
+          A: currentPosition[axisA] + offsetFor(iKey),
+          B: currentPosition[axisB] + offsetFor(jKey),
         };
         const absCenter = {
-          A: iKey === "I" ? iVal : jKey === "I" ? iVal : kVal,
-          B: jKey === "J" ? jVal : iKey === "J" ? jVal : kVal,
+          A: offsetFor(iKey),
+          B: offsetFor(jKey),
         };
 
         if (!centerMode && !firstArcDetected.used) {
