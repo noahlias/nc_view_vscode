@@ -288,18 +288,18 @@ function parseGCode(
 
       let axisA = "X",
         axisB = "Y",
-        iKey = "I",
-        jKey = "J";
+        keyA = "I",
+        keyB = "J";
       if (plane === "G18") {
         axisA = "Z";
         axisB = "X";
-        iKey = "K";
-        jKey = "I";
+        keyA = "K";
+        keyB = "I";
       } else if (plane === "G19") {
         axisA = "Y";
         axisB = "Z";
-        iKey = "J";
-        jKey = "K";
+        keyA = "J";
+        keyB = "K";
       }
 
       const startA = currentPosition[axisA];
@@ -330,17 +330,14 @@ function parseGCode(
         centerB = resolved.center.B;
         sweepOverride = resolved.sweep;
       } else {
+        const offsetFor = (key) => key === "I" ? iVal : key === "J" ? jVal : kVal;
         const relCenter = {
-          A:
-            currentPosition[axisA] +
-            (iKey === "I" ? iVal : jKey === "I" ? iVal : kVal),
-          B:
-            currentPosition[axisB] +
-            (jKey === "J" ? jVal : iKey === "J" ? jVal : kVal),
+          A: currentPosition[axisA] + offsetFor(keyA),
+          B: currentPosition[axisB] + offsetFor(keyB),
         };
         const absCenter = {
-          A: iKey === "I" ? iVal : jKey === "I" ? iVal : kVal,
-          B: jKey === "J" ? jVal : iKey === "J" ? jVal : kVal,
+          A: offsetFor(keyA),
+          B: offsetFor(keyB),
         };
 
         if (!centerMode && !firstArcDetected.used) {
