@@ -7,6 +7,15 @@ to structure this file.
 
 ## [Unreleased]
 
+
+##  0.1.0  - 2026-06-09
+
+### Fixed
+
+* fix: G18/G19 I/J/K mapping, causing incorrect arc paths
+
+* better naming for Circular Interpolation center coordinate keys
+
 ## [0.0.9] - 2026-01-05
 
 ### Fixed
